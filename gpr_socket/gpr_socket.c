@@ -1,10 +1,20 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include "gpr_socket.h"
 #include "gpr_socket_data.h"
+#include "gpr_socket_protocol.h"
+#include "gpr_socket_acq.h"
+#include "../NVA/NVA_CON.h"
+#include "../NVA/NVA_file.h"
+#include "../gpr_param.h"
+#include "../removeTreeDir.h"
 
-
-#define PORT 4000
 int server_socket, client_socket;
 
 bool socket_ready()
@@ -92,7 +102,7 @@ void sendSavePath()
 
 void socket_read(unsigned char buffer[], int buff_size)
 {
-    //받은 버퍼를 이벤트로 변환
+    // 받은 버퍼를 이벤트로 변환
     convertEvent(buffer, buff_size);
     if (tcpData.event_list_cnt > 0)
     {
@@ -101,12 +111,10 @@ void socket_read(unsigned char buffer[], int buff_size)
             switch (tcpData.event_list[i][0])
             {
             case HEADER_INFO_FTN:
-                //앞에 1byte를 안 짤라줘도 상관없네..
-                setHeaderFromJson(*(tcpData.event_list + i));
+                setHeaderFromJson(*(tcpData.event_list + i) + 1);
                 break;
             case ACQ_INFO_FTN:
-                //앞에 1byte를 안 짤라줘도 상관없네..
-                setAcqInfoFromJson(*(tcpData.event_list + i));
+                setAcqInfoFromJson(*(tcpData.event_list + i) + 1);
 
                 if (strlen(acqCon.savePath) == 0)
                 {
@@ -127,10 +135,10 @@ void socket_read(unsigned char buffer[], int buff_size)
                 usleep(1);
                 break;
             case ACQ_SAVE_FTN:
-                saveAcq(*(tcpData.event_list + i), tcpData.event_length_list[i]);
+                saveAcq(*(tcpData.event_list + i) + 1, tcpData.event_length_list[i]);
                 socket_write(ACQ_SAVE_NTF, "", 0);
 
-                //2d일땐 다음 파일 준비
+                // 2d일땐 다음 파일 준비
                 if (headerParameter.cScanMode == 0)
                 {
                     makeSavePath();
@@ -144,17 +152,34 @@ void socket_read(unsigned char buffer[], int buff_size)
 
                 socket_write(ACQ_REFRESH_NTF, "", 0);
 
-                if(acqCon.runAcq) {
+                if (acqCon.runAcq)
+                {
                     startAcq();
                 }
                 break;
             case ACQ_ABNORMAL_QUIT:
                 stopAcq();
-                if(is2DScanMode()) {
-                    deleteAcqFile();
-                } else {
-                    rmtree(acqCon.savePath);
+                if (is2DScanMode())
+                {
+                    deleteAcqFile(); //파일 삭제
                 }
+                else
+                {
+                    rmtree(acqCon.savePath); //폴더 삭제
+                }
+                break;
+            case NVA_REQUEST_FTN:
+            {
+                char *json = getNVAJson();
+                socket_write(NVA_RESPONSE_NTF, json, strlen(json));
+                free(json);
+                break;
+            }
+            case NVA_MODIFY_FTN:
+                setNVASetting(*(tcpData.event_list + i) + 1);
+                saveNVASetting();
+                socket_write(NVA_COMPLETE_NTF, "", 0);
+                GPR_Init(0);
                 break;
             default:
                 break;

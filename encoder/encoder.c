@@ -1,17 +1,13 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include <wiringSerial.h>
-#include <pthread.h>
+#include <stdio.h>
+#include <unistd.h>
 
+#include "encoder.h"
 #include "encoder_queue.h"
-
-#define PIN1 3 //BCM 22
-#define PIN2 4 //BMC 23
-#define SPI_CHANNEL 0
-#define SPI_SPEED 12000000
-pthread_t threadID;
-
-void GPR_Capture_raw(int deviceNumber);
+#include "../gpr_socket/gpr_socket_acq.h"
+#include "../NVA/NVA_CON.h"
 
 void *queue_consume(void *arg)
 {
@@ -36,6 +32,8 @@ void *queue_consume(void *arg)
         }
         usleep(1);
     }
+
+    return NULL;
 }
 
 void encoder_interrupt(void)
@@ -55,23 +53,23 @@ void encoder_interrupt(void)
     }
 }
 
-int wiringPi_ready()
+bool wiringPi_ready()
 {
     if (wiringPiSetup() == -1)
     {
         printf("wiringPiSetup failed\n");
-        return 0;
+        return false;
     }
     if (wiringPiSPISetup(SPI_CHANNEL, SPI_SPEED) == -1)
     {
         printf("wiringPiSPISetup failed\n");
-        return 0;
+        return false;
     }
 
     if (wiringPiISR(PIN1, INT_EDGE_BOTH, &encoder_interrupt) < 0)
     {
         printf("wiringPiISR failed\n");
-        return 0;
+        return false;
     }
 
     pinMode(PIN1, INPUT);
@@ -79,5 +77,5 @@ int wiringPi_ready()
 
     pthread_create(&threadID, NULL, queue_consume, NULL);
     printf("wiringPi setup completed..\n");
-    return 1;
+    return true;
 }

@@ -1,37 +1,33 @@
+#include <stdio.h>
+
+#include "NVA_CON.h"
 #include "NVA6100.h"
 #include "NVA_SPI.h"
-
-int m_uCoarseTune = 8;
-int m_uMediumTune = 17;
-int m_uFineTune = 1;
-int m_uCoarseTuneAdjust = 0;
-int m_uMediumTuneAdjust = 0;
-int m_uFineTuneAdjust = 0;
 
 void NVA_KitConncetCheck(int deviceNumber)
 {
     SPI_Read(deviceNumber, FORCE_ZERO, 1);
-    ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
+    NVAParam.ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
     SPI_Read(deviceNumber, FORCE_ZERO, 1);
     SPI_Action(deviceNumber, RESET_SWEEP_CONTROLLER);
 
     SPI_Read(deviceNumber, FORCE_ZERO, 1);
-    ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
-    CounterBitSelOut = SPI_Read(deviceNumber, COUNTER_BIT_SELECTOR_OUTPUT, 2);
-    SamplingRateMeasResult = SPI_Read(deviceNumber, SAMPLINGRATE_MEASUREMENT_RESULT, 1);
-    SweepControllerStatus = SPI_Read(deviceNumber, SWEEP_CONTROLLER_STATUS, 2);
-    TimingMeasResult = SPI_Read(deviceNumber, TIMING_CALIBRATION_RESULT, 1);
+    NVAParam.ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
+    NVAParam.CounterBitSelOut = SPI_Read(deviceNumber, COUNTER_BIT_SELECTOR_OUTPUT, 2);
+    NVAParam.SamplingRateMeasResult = SPI_Read(deviceNumber, SAMPLINGRATE_MEASUREMENT_RESULT, 1);
+    NVAParam.SweepControllerStatus = SPI_Read(deviceNumber, SWEEP_CONTROLLER_STATUS, 2);
+    NVAParam.TimingMeasResult = SPI_Read(deviceNumber, TIMING_CALIBRATION_RESULT, 1);
 
     // Open the kit:::ForceZero and Read Chip ID
     SPI_Read(deviceNumber, FORCE_ZERO, 1);
     SPI_Read(deviceNumber, FORCE_ONE, 1);
-    ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
-    CounterBitSelOut = SPI_Read(deviceNumber, COUNTER_BIT_SELECTOR_OUTPUT, 2);
-    SamplingRateMeasResult = SPI_Read(deviceNumber, SAMPLINGRATE_MEASUREMENT_RESULT, 1);
-    SweepControllerStatus = SPI_Read(deviceNumber, SWEEP_CONTROLLER_STATUS, 2);
-    TimingMeasResult = SPI_Read(deviceNumber, TIMING_CALIBRATION_RESULT, 1);
+    NVAParam.ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
+    NVAParam.CounterBitSelOut = SPI_Read(deviceNumber, COUNTER_BIT_SELECTOR_OUTPUT, 2);
+    NVAParam.SamplingRateMeasResult = SPI_Read(deviceNumber, SAMPLINGRATE_MEASUREMENT_RESULT, 1);
+    NVAParam.SweepControllerStatus = SPI_Read(deviceNumber, SWEEP_CONTROLLER_STATUS, 2);
+    NVAParam.TimingMeasResult = SPI_Read(deviceNumber, TIMING_CALIBRATION_RESULT, 1);
 
-    printf("ChipID: %d\n", ChipID);
+    printf("ChipID: %d\n", NVAParam.ChipID);
 }
 void NVA_VarInit(int deviceNumber)
 {
@@ -39,40 +35,40 @@ void NVA_VarInit(int deviceNumber)
     // [11:7]: CounterMSB
     // [ 6:2]: CounterLSB
     // [ 1:0]: Downsampling 0: 512, 1: 256, 2: 128, 3: 64
-    if (DownSamping == 0)
+    if (NVAParam.DownSamping == 0)
     {
         SPI_Write(deviceNumber, SAMPLER_READOUTCTRL, 2, 0x0f80);
     }
-    else if (DownSamping == 1)
+    else if (NVAParam.DownSamping == 1)
     {
         SPI_Write(deviceNumber, SAMPLER_READOUTCTRL, 2, 0x0f81);
     }
-    else if (DownSamping == 2)
+    else if (NVAParam.DownSamping == 2)
     {
         SPI_Write(deviceNumber, SAMPLER_READOUTCTRL, 2, 0x0f82);
     }
-    else if (DownSamping == 3)
+    else if (NVAParam.DownSamping == 3)
     {
         SPI_Write(deviceNumber, SAMPLER_READOUTCTRL, 2, 0x0f83);
     }
 
     // SamplerCtrl: Select the effective sampling interval in the sampler
     // Sampling rate 0x0000: 26pS, 0x0001: 52pS, 0x0002: 280pS, 0x0003: Not used
-    if (SamplingRate == 0)
+    if (NVAParam.SamplingRate == 0)
     {
-        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, SamplingRate);
+        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, NVAParam.SamplingRate);
     }
-    else if (SamplingRate == 1)
+    else if (NVAParam.SamplingRate == 1)
     {
-        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, SamplingRate);
+        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, NVAParam.SamplingRate);
     }
-    else if (SamplingRate == 2)
+    else if (NVAParam.SamplingRate == 2)
     {
-        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, SamplingRate);
+        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, NVAParam.SamplingRate);
     }
-    else if (SamplingRate == 3)
+    else if (NVAParam.SamplingRate == 3)
     {
-        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, SamplingRate);
+        SPI_Write(deviceNumber, SAMPLER_CTRL, 1, NVAParam.SamplingRate);
     }
 
     // ThresholderPowerdown: [1]: Manual power down, [0]: Disable Automatic power down
@@ -82,37 +78,37 @@ void NVA_VarInit(int deviceNumber)
     SPI_Write(deviceNumber, SAMPLER_INPUT_CTRL, 1, 0x00);
 
     // ThresholderCtrl, Selecting gain
-    if (Gain == 7)
+    if (NVAParam.Gain == 7)
     {
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 0x00);
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 4 << 2);
     }
-    else if (Gain == 6)
+    else if (NVAParam.Gain == 6)
     {
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 0x00);
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 2 << 2);
     }
-    else if (Gain == 5)
+    else if (NVAParam.Gain == 5)
     {
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 0x00);
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 6 << 2);
     }
-    else if (Gain == 4)
+    else if (NVAParam.Gain == 4)
     {
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 0x00);
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 1 << 2);
     }
-    else if (Gain == 3)
+    else if (NVAParam.Gain == 3)
     {
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 0x00);
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 5 << 2);
     }
-    else if (Gain == 2)
+    else if (NVAParam.Gain == 2)
     {
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 0x00);
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 3 << 2);
     }
-    else if (Gain == 1)
+    else if (NVAParam.Gain == 1)
     {
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 0x00);
         SPI_Write(deviceNumber, THRESHOLDER_CTRL, 1, 7 << 2);
@@ -146,22 +142,22 @@ void NVA_VarInit(int deviceNumber)
     SPI_Write(deviceNumber, SWEEP_MAIN_CTRL, 1, 0x01);
 
     // DACMax: Default: 5734 -> 0x1666
-    SPI_Write(deviceNumber, DAC_MAX, 2, DACMax);
+    SPI_Write(deviceNumber, DAC_MAX, 2, NVAParam.DACMax);
 
     // DACMin: Default: 2457 -> 0x0999
-    SPI_Write(deviceNumber, DAC_MIN, 2, DACMin);
+    SPI_Write(deviceNumber, DAC_MIN, 2, NVAParam.DACMin);
 
     // DACStep: Step size of DAC sweep
-    SPI_Write(deviceNumber, DAC_STEP, 2, DACStep);
+    SPI_Write(deviceNumber, DAC_STEP, 2, NVAParam.DACStep);
 
     // Iterations: Default: 50 -> 0x0032
-    SPI_Write(deviceNumber, ITERATIONS, 2, Iterations);
+    SPI_Write(deviceNumber, ITERATIONS, 2, NVAParam.Iterations);
 
     // FocusMax: Defines the focus max value, Default: 4000 -> 0x0fa0
-    SPI_Write(deviceNumber, FOCUS_MAX, 2, FocusMax); //
+    SPI_Write(deviceNumber, FOCUS_MAX, 2, NVAParam.FocusMax); //
 
     // FocusMin: Defines the focus min value, Default: 2000 -> 0x07d0
-    SPI_Write(deviceNumber, FOCUS_MIN, 2, FocusMin); //
+    SPI_Write(deviceNumber, FOCUS_MIN, 2, NVAParam.FocusMin); //
 
     // FocusSetupTime: Setup time, in MCLK periods,
     // for the Focus signal going from the sweep controller to the sampler
@@ -219,17 +215,17 @@ void NVA_VarInit(int deviceNumber)
     // [8:0] Sample Delay Coarse Tune: Delays the sample signal using 0-351 delay elements, each with a delay of ~1ns.
     // Original comment: frame offset, sampleDelayCoarseTune, 0m(2), 2m(12) 4m(23) 6m(34) 8m(44)
     // RADAR scope default: 0, Matlab source default: 4
-    SPI_Write(deviceNumber, SAMPLE_DELAY_COARSE_TUNE, 2, m_uCoarseTune + m_uCoarseTuneAdjust);
+    SPI_Write(deviceNumber, SAMPLE_DELAY_COARSE_TUNE, 2, NVAParam.CoarseTune + NVAParam.CoarseTuneAdjust);
 
     // SampleDelayMediumTune
     // [5:0] Sample Delay Mdeium Tune: Delays the sample signal using 0-63 delay elements, each with a delay of ~31ps.
     // Original comment: sampleDelayMediumTune, 0m(10), 2m(27) 4m(15) 6m(2) 8m(20)
     // RADAR scope default: 0, Matlab source default: 30
-    SPI_Write(deviceNumber, SAMPLE_DELAY_MEDIUM_TUNE, 1, m_uMediumTune + m_uMediumTuneAdjust);
+    SPI_Write(deviceNumber, SAMPLE_DELAY_MEDIUM_TUNE, 1, NVAParam.MediumTune + NVAParam.MediumTuneAdjust);
 
     // SampleDelayFineTune
     // [5:0] Sample Delay Fine Tune: Delays the sample signal using 0-63 delay elements, each with a delay of ~1.7ps.
-    SPI_Write(deviceNumber, SAMPLE_DELAY_FINE_TUNE, 1, m_uFineTune + m_uFineTuneAdjust);
+    SPI_Write(deviceNumber, SAMPLE_DELAY_FINE_TUNE, 1, NVAParam.FineTune + NVAParam.FineTuneAdjust);
 
     // SendPulseDelayCoarseTune
     // [8:0]: Send Pulse Delay Coarse Tune: Delays the send pulse signal using 0-351 delay elements, each with a delay of ~1ns.
@@ -332,5 +328,5 @@ void GPR_Capture_raw(int deviceNumber)
     // 데이터를 버퍼에 담기 위해 LOAD_OUTPUT_BUFFER명령 수행
     SPI_Action(deviceNumber, LOAD_OUTPUT_BUFFER);
     // 버퍼에 담긴 데이터를 SPI 통신을 통해 원하는 변수로 저장
-    SPI_Read(deviceNumber, SAMPLER_OUTPUT_BUFFER, SamplingCount * 4);
+    SPI_Read(deviceNumber, SAMPLER_OUTPUT_BUFFER, NVAParam.SamplingCount * 4);
 }

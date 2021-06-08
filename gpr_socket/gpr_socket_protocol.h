@@ -1,3 +1,6 @@
+#ifndef gpr_socket_param__h
+#define gpr_socket_param__h
+
 enum SocketProtocol
 {
     //최초 연결
@@ -38,3 +41,5 @@ enum SocketProtocol
     //에러 사항
     ACQ_ABNORMAL_QUIT = 0x31,
 } socketProtocol;
+
+#endif

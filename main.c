@@ -1,15 +1,11 @@
 #include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
 
-#include "removeTreeDir.h"
-#include "cJSON.h"
-#include "gpr_socket_protocol.h"
-#include "gpr_socket.h"
-#include "encoder.h"
-#include "NVA_CON.h"
+#include "encoder/encoder.h"
+#include "NVA/NVA_CON.h"
+#include "NVA/NVA_file.h"
+#include "gpr_socket/gpr_socket.h"
+#include "gpr_socket/gpr_socket_protocol.h"
 
 int main()
 {
@@ -17,13 +13,16 @@ int main()
     {
         return 0;
     }
-    usleep(1); //printf문 띄울려고..
     GPR_Init(0);
-    
+
+    usleep(1); //printf문 띄울려고..
+
     if (!socket_ready())
     {
         return 0;
     }
+
+    loadNVASetting();
 
     while (1)
     {
@@ -52,6 +51,3 @@ int main()
 
     return 0;
 }
-
-//gcc -o main main.c
-//gcc main.c cJSON.c -o main -l wiringPi -pthread

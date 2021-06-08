@@ -1,18 +1,12 @@
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
-void socket_write(char code, void *bytes, int size);
-
-struct AcqContoroller
-{
-    FILE *fp;
-    char *fileName;
-    char *savePath;
-    int dataCnt;                     //취득 중인 데이터 총량
-    int dataSize3D;                  //취득해야 하는 데이터 사이즈
-    char *grid3D;                    //그리드 2x2, 1x1 표시
-    bool runAcq;                     //취득 데이타를 전송 중인지
-    unsigned char NVA_readData[640]; //취득한 데이타
-};
+#include "gpr_socket_acq.h"
+#include "gpr_socket.h"
+#include "gpr_socket_protocol.h"
+#include "../gpr_param.h"
 
 struct AcqContoroller acqCon = {.fp = NULL, .fileName = NULL, .savePath = NULL, .dataCnt = 0, .dataCnt = 0, .grid3D = NULL, .runAcq = false};
 
@@ -159,22 +153,39 @@ void stopAcq()
     acqCon.runAcq = false;
 }
 
+void _mkdir(const char *dir)
+{
+    char tmp[1024];
+    char *p = NULL;
+    size_t len;
+
+    snprintf(tmp, sizeof(tmp), "%s", dir);
+    len = strlen(tmp);
+    if (tmp[len - 1] == '/')
+        tmp[len - 1] = 0;
+    for (p = tmp + 1; *p; p++)
+        if (*p == '/')
+        {
+            *p = 0;
+            mkdir(tmp, S_IRWXU);
+            *p = '/';
+        }
+    mkdir(tmp, S_IRWXU);
+}
+
 void startAcq()
 {
     struct stat st = {0};
     if (stat(acqCon.savePath, &st) == -1)
     {
-        mkdir(acqCon.savePath, 0700);
-    }
-
-    if (fileexists(acqCon.savePath, acqCon.fileName))
-    {
-        deleteAcqFile();
+        _mkdir(acqCon.savePath);
     }
     acqCon.dataCnt = 0;
     char *path = getFullPath(acqCon.savePath, acqCon.fileName);
     acqCon.fp = fopen(path, "wb");
-    fseek(acqCon.fp, fixHeaderSize, SEEK_SET);
+    if(acqCon.fp != NULL) {
+        fseek(acqCon.fp, fixHeaderSize, SEEK_SET);
+    }
     free(path);
     acqCon.runAcq = true;
 }

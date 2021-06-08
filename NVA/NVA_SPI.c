@@ -1,3 +1,10 @@
+#include <unistd.h>
+#include <wiringPiSPI.h>
+
+#include "NVA_SPI.h"
+#include "../encoder/encoder.h"
+#include "../gpr_socket/gpr_socket_acq.h"
+
 void SPI_Transfer(int deviceNumber, unsigned char tx[], int size)
 {
     usleep(100);
