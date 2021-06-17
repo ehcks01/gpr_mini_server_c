@@ -29,6 +29,7 @@ void NVA_KitConncetCheck(int deviceNumber)
 
     printf("ChipID: %d\n", NVAParam.ChipID);
 }
+
 void NVA_VarInit(int deviceNumber)
 {
     // Sampler Readout Control

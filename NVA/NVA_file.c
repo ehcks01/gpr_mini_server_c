@@ -3,19 +3,22 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../cJSON/cJSON.h"
+#include "../common/cJSON.h"
+#include "../common/dir_control.h"
 #include "NVA6100.h"
 #include "NVA_file.h"
 
-bool getNVAPath(char path[])
+char *strNVAPath;
+
+bool initNVAPath()
 {
-    char *res = realpath(".", path);
-    if (res)
-    {
-        strcat(path, "/NVA_Setting");
-        return true;
-    }
-    return false;
+    char *NVAPath = "/NVA_Setting";
+    int pathlen = strlen(strRealPath) + strlen(NVAPath) + 1;
+    strNVAPath = (char *)calloc(pathlen, 1);
+    strcpy(strNVAPath, strRealPath);
+    strcat(strNVAPath, NVAPath);
+
+    return true;
 }
 
 char *getNVAJson()
@@ -39,7 +42,7 @@ char *getNVAJson()
     // cJSON_AddItemToObject(root, "TimingMeasResult", cJSON_CreateNumber(NVAParam.TimingMeasResult));
     // cJSON_AddItemToObject(root, "FocusMax", cJSON_CreateNumber(NVAParam.FocusMax));
     // cJSON_AddItemToObject(root, "FocusMin", cJSON_CreateNumber(NVAParam.FocusMin));
-    
+
     char *out = cJSON_Print(root);
     cJSON_Delete(root);
 
@@ -49,43 +52,34 @@ char *getNVAJson()
 void saveNVASetting()
 {
     char *out = getNVAJson();
-
-    char path[1024];
-    if (getNVAPath(path))
+    FILE *fp = fopen(strNVAPath, "w");
+    if (fp != NULL)
     {
-        FILE *fp = fopen(path, "w");
-        if (fp != NULL)
-        {
-            fwrite(out, 1, strlen(out), fp);
-            fclose(fp);
-        }
+        fwrite(out, 1, strlen(out), fp);
+        fclose(fp);
     }
     free(out);
 }
 
 char *readNVAFile()
 {
-    char path[1024];
-    if (getNVAPath(path))
+    FILE *fp = fopen(strNVAPath, "r");
+    if (fp != NULL)
     {
-        FILE *fp = fopen(path, "r");
-        if (fp != NULL)
+        fseek(fp, 0, SEEK_END);
+        long lSize = ftell(fp);
+        rewind(fp);
+
+        char *buffer = (char *)malloc(sizeof(char) * lSize);
+        size_t result = fread(buffer, 1, lSize, fp);
+        if (result != lSize)
         {
-            fseek(fp, 0, SEEK_END);
-            long lSize = ftell(fp);
-            rewind(fp);
-
-            char *buffer = (char *)malloc(sizeof(char) * lSize);
-            size_t result = fread(buffer, 1, lSize, fp);
-            if (result != lSize)
-            {
-                printf("Reading error: %s \n", path);
-                return NULL;
-            }
-
-            fclose(fp);
-            return buffer;
+            printf("Reading error: %s \n", strNVAPath);
+            return NULL;
         }
+
+        fclose(fp);
+        return buffer;
     }
     return NULL;
 }
@@ -125,4 +119,3 @@ void loadNVASetting()
         free(bytes);
     }
 }
-

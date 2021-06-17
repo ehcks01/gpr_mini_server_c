@@ -6,7 +6,8 @@
 #include "gpr_socket_acq.h"
 #include "gpr_socket.h"
 #include "gpr_socket_protocol.h"
-#include "../gpr_param.h"
+#include "../common/gpr_param.h"
+#include "../common/dir_control.h"
 
 struct AcqContoroller acqCon = {.fp = NULL, .fileName = NULL, .savePath = NULL, .dataCnt = 0, .dataCnt = 0, .grid3D = NULL, .runAcq = false};
 
@@ -32,15 +33,6 @@ bool isNotFull3DData()
     return false;
 }
 
-char *getFullPath(const char *path, const char *filename)
-{
-    char *name = malloc(strlen(path) + strlen(filename) + 1);
-    strcpy(name, path);
-    strcat(name, "/");
-    strcat(name, filename);
-    return name;
-}
-
 bool fileexists(const char *path, const char *filename)
 {
     char *name = getFullPath(path, filename);
@@ -52,24 +44,19 @@ bool fileexists(const char *path, const char *filename)
 bool makeSavePath()
 {
     char pathBuf[4096];
-    char *res = realpath(".", pathBuf);
-
-    if (!res)
-    {
-        return false;
-    }
-
+    strcpy(pathBuf, strRealPath);
     int inc = 0;
-    strcat(pathBuf, "/data/");
+    strcat(pathBuf, "/");
+    strcat(pathBuf, fixDataRootName);
+    strcat(pathBuf, "/");
     strcat(pathBuf, headerParameter.strSiteName);
 
     if (is2DScanMode())
     {
         strcat(pathBuf, "/2D");
         free(acqCon.savePath);
-        acqCon.savePath = (char *)calloc(strlen(pathBuf), 1);
+        acqCon.savePath = (char *)calloc(strlen(pathBuf) + 1, 1);
         memcpy(acqCon.savePath, pathBuf, strlen(pathBuf));
-
         do
         {
             inc++;
@@ -108,6 +95,8 @@ bool makeSavePath()
         memcpy(acqCon.savePath, pathBuf, strlen(pathBuf));
         printf("make savePath: %s \n", acqCon.savePath);
     }
+
+    return true;
 }
 
 void endFileWrite()
@@ -122,29 +111,17 @@ void endFileWrite()
 void deleteAcqFile()
 {
     char *path = getFullPath(acqCon.savePath, acqCon.fileName);
-    int nResult = remove(path);
-    if (nResult == 0)
-    {
-        printf("file delete successed: %s\n", path);
-    }
-    else if (nResult == -1)
-    {
-        printf("file delete failed: %s\n", path);
-    }
+    deleteFile(path);
     free(path);
 }
 
 void deleteAcq3DFolder()
 {
-    int nResult = remove(acqCon.savePath);
-    if (nResult == 0)
-    {
-        printf("folder delete successed: %s\n", acqCon.savePath);
-    }
-    else if (nResult == -1)
-    {
-        printf("folder delete failed: %s\n", acqCon.savePath);
-    }
+    cJSON *list = cJSON_CreateArray();
+    getDirList(list, acqCon.savePath, true);
+    deleteDirList(list);
+    deleteDir(acqCon.savePath); //자기 자신 삭제
+    cJSON_Delete(list);
 }
 
 void stopAcq()
@@ -153,32 +130,12 @@ void stopAcq()
     acqCon.runAcq = false;
 }
 
-void _mkdir(const char *dir)
-{
-    char tmp[1024];
-    char *p = NULL;
-    size_t len;
-
-    snprintf(tmp, sizeof(tmp), "%s", dir);
-    len = strlen(tmp);
-    if (tmp[len - 1] == '/')
-        tmp[len - 1] = 0;
-    for (p = tmp + 1; *p; p++)
-        if (*p == '/')
-        {
-            *p = 0;
-            mkdir(tmp, S_IRWXU);
-            *p = '/';
-        }
-    mkdir(tmp, S_IRWXU);
-}
-
 void startAcq()
 {
     struct stat st = {0};
     if (stat(acqCon.savePath, &st) == -1)
     {
-        _mkdir(acqCon.savePath);
+        mkdirs(acqCon.savePath);
     }
     acqCon.dataCnt = 0;
     char *path = getFullPath(acqCon.savePath, acqCon.fileName);

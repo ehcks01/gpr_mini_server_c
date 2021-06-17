@@ -20,14 +20,12 @@ extern struct AcqContoroller acqCon;
 
 bool is2DScanMode();
 bool isNotFull3DData();
-char *getFullPath(const char *path, const char *filename);
 bool fileexists(const char *path, const char *filename);
 bool makeSavePath();
 void endFileWrite();
 void deleteAcqFile();
 void deleteAcq3DFolder();
 void stopAcq();
-void _mkdir(const char *dir);
 void startAcq();
 void frontRowData();
 void backRowData();

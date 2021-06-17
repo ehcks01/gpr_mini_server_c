@@ -10,10 +10,12 @@
 #include "gpr_socket_data.h"
 #include "gpr_socket_protocol.h"
 #include "gpr_socket_acq.h"
+#include "gpr_socket_ana.h"
 #include "../NVA/NVA_CON.h"
 #include "../NVA/NVA_file.h"
-#include "../gpr_param.h"
-#include "../removeTreeDir.h"
+#include "../common/gpr_param.h"
+#include "../common/dir_control.h"
+#include "../common/usb_control.h"
 
 int server_socket, client_socket;
 
@@ -165,7 +167,7 @@ void socket_read(unsigned char buffer[], int buff_size)
                 }
                 else
                 {
-                    rmtree(acqCon.savePath); //폴더 삭제
+                    deleteAcq3DFolder();
                 }
                 break;
             case NVA_REQUEST_FTN:
@@ -181,6 +183,35 @@ void socket_read(unsigned char buffer[], int buff_size)
                 socket_write(NVA_COMPLETE_NTF, "", 0);
                 GPR_Init(0);
                 break;
+            case ANA_ROOT_DIR_FTN:
+                sendRootDir();
+                break;
+            case ANA_DISK_SIZE_FTN:
+                sendDiskSize();
+                break;
+            case ANA_READ_DIR_FTN:
+                sendReadDir(*(tcpData.event_list + i) + 1, ANA_READ_DIR_NTF, false);
+                break;
+            case ANA_CHECK_DIR_FTN:
+                sendReadDir(*(tcpData.event_list + i) + 1, ANA_CHECK_DIR_NTF, true);
+                break;
+            case ANA_UNCHECK_DIR_FTN:
+                sendReadDir(*(tcpData.event_list + i) + 1, ANA_UNCHECK_DIR_NTF, true);
+                break;
+            case ANA_DELETE_FILE_FTN:
+                sendDeleteFile(*(tcpData.event_list + i) + 1);
+                break;
+            case ANA_DELETE_FOLDER_FTN:
+                sendDeleteFolder(*(tcpData.event_list + i) + 1);
+                break;
+            case ANA_USB_INFO_FTN:
+                sendUsbInFo();
+                break;
+            case ANA_USB_COPY_FTN:
+                socket_write(ANA_USB_COPY_NTF, "", 0);
+                tryCopyFiles(*(tcpData.event_list + i) + 1);
+                socket_write(ANA_USB_COPY_DONE_NTF, "", 0);
+                break;
             default:
                 break;
             }
@@ -194,5 +225,5 @@ void socket_read(unsigned char buffer[], int buff_size)
 void socket_close()
 {
     stopAcq();
-    printf("close :%d \n", tcpData.total_length);
+    // printf("close :%d \n", tcpData.total_length);
 }

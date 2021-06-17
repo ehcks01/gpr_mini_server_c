@@ -15,16 +15,19 @@ SET ( OUTPUT_ELF
         "${CMAKE_PROJECT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.out"
         )
 SET ( SRC_FILES
-        cJSON/cJSON.c
+        common/cJSON.c
+        common/gpr_param.c
+        common/dir_control.c
+        common/usb_control.c
         encoder/encoder.c
         NVA/NVA_SPI.c
         NVA/NVA_CON.c
         NVA/NVA_file.c
         NVA/NVA6100.c
         gpr_socket/gpr_socket_acq.c
+        gpr_socket/gpr_socket_ana.c
         gpr_socket/gpr_socket.c
         gpr_socket/gpr_socket_data.c
-        gpr_param.c
         main.c
         )
  

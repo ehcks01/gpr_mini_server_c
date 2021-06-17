@@ -1,12 +1,13 @@
 #ifndef NVA_file__h
 #define NVA_file__h
 
-bool getNVAPath(char path[]);
+bool initNVAPath();
 char *getNVAJson();
 void saveNVASetting();
 char *readNVAFile();
 void setNVASetting(char *bytes);
 void loadNVASetting();
 
+extern char *strNVAPath;
 #endif
 

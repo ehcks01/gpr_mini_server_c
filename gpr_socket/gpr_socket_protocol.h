@@ -40,6 +40,34 @@ enum SocketProtocol
 
     //에러 사항
     ACQ_ABNORMAL_QUIT = 0x31,
+
+    //분석 ㅠㅠ
+    ANA_ROOT_DIR_FTN = 0x51,
+    ANA_ROOT_DIR_NTF = 0x52,
+    ANA_READ_DIR_FTN = 0x53,
+    ANA_READ_DIR_NTF = 0x54,
+    //ANA_READ_DIR_FTN랑 같음 ㅠㅠ 처리만 다르게..
+    ANA_CHECK_DIR_FTN = 0x55,
+    ANA_CHECK_DIR_NTF = 0x56,
+    ANA_UNCHECK_DIR_FTN = 0x57,
+    ANA_UNCHECK_DIR_NTF = 0x58,
+
+    ANA_DISK_SIZE_FTN = 0x61,
+    ANA_DISK_SIZE_NTF = 0x62,
+
+    ANA_DELETE_FILE_FTN = 0x71,
+    ANA_DELETE_FOLDER_FTN = 0x72,
+    ANA_DELETE_FILE_NTF = 0x73,
+    ANA_DELETE_FOLDER_NTF = 0x74,
+
+    ANA_USB_INFO_FTN = 0x81,
+    ANA_USB_INFO_NTF = 0x82,
+    ANA_USB_INFO_FAILED_NTF = 0x83,
+    ANA_USB_COPY_FTN = 0x84,
+    ANA_USB_COPY_NTF = 0x85,
+    ANA_USB_COPYING_NAME_NTF = 0x86,
+    ANA_USB_COPY_DONE_NTF = 0x87,
+    ANA_USB_COPY_FAILED_NAME_NTF = 0x88,
 } socketProtocol;
 
 #endif

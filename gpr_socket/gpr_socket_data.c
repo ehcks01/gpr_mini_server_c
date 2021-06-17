@@ -3,8 +3,8 @@
 
 #include "gpr_socket_data.h"
 #include "gpr_socket_acq.h"
-#include "../gpr_param.h"
-#include "../cJSON/cJSON.h"
+#include "../common/gpr_param.h"
+#include "../common/cJSON.h"
 
 struct TcpData tcpData = {.event_length = 0, .total_length = 0, .event_list_cnt = 0};
 
@@ -133,6 +133,7 @@ void setHeaderFromJson(char *bytes)
     if (json != NULL)
     {
         char *str = cJSON_GetObjectItem(json, "strDate")->valuestring;
+        memset(headerParameter.strDate, 0, strlen(headerParameter.strDate));
         memcpy(headerParameter.strDate, str, strlen(str));
         // printf("strData: %s\n", headerParameter.strDate);
 
@@ -156,12 +157,14 @@ void setHeaderFromJson(char *bytes)
 
         str = cJSON_GetObjectItem(json, "strSiteName")->valuestring;
         str = arrayCodeToStr(str);
+        memset(headerParameter.strSiteName, 0, strlen(headerParameter.strSiteName));
         memcpy(headerParameter.strSiteName, str, strlen(str));
         free(str);
         // printf("strSiteName: %s\n", headerParameter.strSiteName);
 
         str = cJSON_GetObjectItem(json, "strOperator")->valuestring;
         str = arrayCodeToStr(str);
+        memset(headerParameter.strOperator, 0, strlen(headerParameter.strOperator));
         memcpy(headerParameter.strOperator, str, strlen(str));
         free(str);
         // printf("strOperator: %s\n", headerParameter.strOperator);

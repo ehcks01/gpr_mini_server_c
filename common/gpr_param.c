@@ -5,3 +5,5 @@ struct HeaderParameter headerParameter = {
 
 const int fixHeaderSize = 256;
 const int fixDepthDataSize = 640;
+const char *fixDataRootName = "GPR_DATA";
+
