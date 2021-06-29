@@ -10,5 +10,8 @@ void sendDeleteFile(char *path);
 void sendDeleteFolder(char *path);
 void sendUsbInFo();
 void tryCopyFiles(char *bytes);
+void sendFileData(char *path);
+void sendLoadConfiFile(char *path);
+void sendSaveConfigFile(char *bytes);
 
 #endif

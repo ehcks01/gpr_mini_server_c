@@ -15,6 +15,8 @@ enum SocketProtocol
     ACQ_INFO_FTN = 0x05,
     //저장 경로 보냄
     ACQ_SAVE_PATH_NTF = 0x06,
+    //레이저 on 요청
+    ACQ_LASER_ON_FTN = 0x07,
 
     //취득 시작
     ACQ_START_FTN = 0x11,
@@ -68,6 +70,24 @@ enum SocketProtocol
     ANA_USB_COPYING_NAME_NTF = 0x86,
     ANA_USB_COPY_DONE_NTF = 0x87,
     ANA_USB_COPY_FAILED_NAME_NTF = 0x88,
+
+    //gpr file data만 불러옴
+    ANA_LOAD_FILE_FTN = 0x91,
+    ANA_LOAD_FILE_NTF = 0x92,
+    //위와 동일한데 tcp로 gpr data를 받으면 config 설정 파일을 요청함.
+    ANA_LOAD_FILE_WITH_CONFIG_FTN = 0x93,
+    ANA_LOAD_FILE_WITH_CONFIG_NTF = 0x94,
+    ANA_FILE_SIZE_NTF = 0x95,
+    ANA_FILE_DATA_NTF = 0x96,
+    //config 파일
+    ANA_LOAD_CONFIG_FILE_FTN = 0x97,
+    ANA_LOAD_CONFIG_FILE_NTF = 0x98,
+    //config 파일 저장
+    ANA_SAVE_CONFIG_FILE_FTN = 0x99,
+    ANA_SAVE_CONFIG_FILE_NTF = 0x9A,
+    //topview를 볼 때
+    ANA_LOAD_TOP_VIEW_FNT = 0x9B,
+    ANA_LOAD_TOP_VIEW_NTF = 0x9C,
 } socketProtocol;
 
 #endif

@@ -7,7 +7,7 @@
 
 void SPI_Transfer(int deviceNumber, unsigned char tx[], int size)
 {
-    usleep(100);
+    usleep(1);
     wiringPiSPIDataRW(SPI_CHANNEL, tx, size);
 }
 

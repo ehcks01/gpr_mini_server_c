@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include <math.h>
 
 #include "NVA_CON.h"
 #include "NVA6100.h"
@@ -269,11 +271,11 @@ void GPR_Init(int deviceNumber)
     float m_fTMV = 0;
     float m_fReferenceTMV = 15.45;
 
-    // m_uCoarseTuneAdjust = 0;
-    // m_uMediumTuneAdjust = 0;
-    // m_uFineTuneAdjust = 0;
+    NVAParam.CoarseTuneAdjust = 0;
+    NVAParam.MediumTune = 0;
+    NVAParam.FineTune = 0;
 
-    // TMV값이 변동이 심하기 때문에 10번의 데이터를 취득한 후 평균을 사용한다.
+    // // TMV값이 변동이 심하기 때문에 10번의 데이터를 취득한 후 평균을 사용한다.
     // for (int i = 0; i < 10; i++) {
     //   m_fTMV += GPR_TimingMeasurementValueLiveRead(deviceNumber); // TMV 취득 함수 수행, 해당 값의 단위는 nS
     // }
@@ -285,23 +287,23 @@ void GPR_Init(int deviceNumber)
     // Temp = (m_fTMV - m_fReferenceTMV) / 2;
 
     // if (Temp >= 1) {
-    //   m_uCoarseTuneAdjust = floor(Temp / 1);
-    //   Temp = Temp - m_uCoarseTuneAdjust;
+    //    NVAParam.CoarseTuneAdjust = floor(Temp / 1);
+    //   Temp = Temp - NVAParam.CoarseTuneAdjust;
     // }
 
     // if (Temp >= 0.031) {
-    //   m_uMediumTuneAdjust = floor(Temp / 0.031);
-    //   Temp = Temp - m_uMediumTuneAdjust * 0.031;
+    //   NVAParam.MediumTune = floor(Temp / 0.031);
+    //   Temp = Temp - NVAParam.MediumTune * 0.031;
     // }
 
     // if (Temp >= 0.0017) {
-    //   m_uFineTuneAdjust = floor(Temp / 0.0017);
+    //   NVAParam.FineTune = floor(Temp / 0.0017);
     // }
 
     // // If m_cGNDCut is off, 0cm is not the surface of the object.
     // // It has a room from 0cm. Hence m_uMediumTuneAdjust has -3 value to make a room from 0cm.
     // bool m_cGNDCut = false;
-    // if (m_cGNDCut == false) m_uMediumTuneAdjust = m_uMediumTuneAdjust - 3;
+    // if (m_cGNDCut == false) NVAParam.MediumTune = NVAParam.MediumTune - 3;
 
     // 초기화
     NVA_Init(deviceNumber);

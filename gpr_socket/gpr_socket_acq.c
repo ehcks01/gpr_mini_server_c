@@ -2,6 +2,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <wiringPi.h>
 
 #include "gpr_socket_acq.h"
 #include "gpr_socket.h"
@@ -140,7 +141,8 @@ void startAcq()
     acqCon.dataCnt = 0;
     char *path = getFullPath(acqCon.savePath, acqCon.fileName);
     acqCon.fp = fopen(path, "wb");
-    if(acqCon.fp != NULL) {
+    if (acqCon.fp != NULL)
+    {
         fseek(acqCon.fp, fixHeaderSize, SEEK_SET);
     }
     free(path);
@@ -178,7 +180,7 @@ void saveAcq(char *headerInfo, int size)
     {
         fseek(fp, 0, SEEK_SET);
         //앞에 1바이트는 socket code라서 제외 시킴
-        fwrite(headerInfo + 1, 1, size - 1, fp);
+        fwrite(headerInfo, 1, size - 1, fp);
         fclose(fp);
         printf("file save successed: %s \n", path);
     }
@@ -187,4 +189,13 @@ void saveAcq(char *headerInfo, int size)
         printf("file save failed: %s \n", path);
     }
     free(path);
+}
+
+void laserOn()
+{
+    digitalWrite(LASER_PIN, HIGH);
+}
+void laserOff()
+{
+    digitalWrite(LASER_PIN, LOW);
 }

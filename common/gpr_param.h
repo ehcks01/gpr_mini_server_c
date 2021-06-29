@@ -43,5 +43,6 @@ struct HeaderParameter
 extern struct HeaderParameter headerParameter;
 extern const int fixHeaderSize;
 extern const int fixDepthDataSize;
+extern const char *fixDataRootName;
 
 #endif

@@ -74,6 +74,7 @@ bool wiringPi_ready()
 
     pinMode(PIN1, INPUT);
     pinMode(PIN2, INPUT);
+    pinMode(LASER_PIN, OUTPUT);
 
     pthread_create(&threadID, NULL, queue_consume, NULL);
     printf("wiringPi setup completed..\n");

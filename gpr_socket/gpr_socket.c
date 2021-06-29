@@ -86,7 +86,7 @@ void socket_server_done()
 void socket_write(char code, void *bytes, int size)
 {
     int sendLen = size + 1;
-    char *send = calloc(sendLen + 4, 1);
+    char *send = malloc(sendLen + 4);
     intToBytes(sendLen, send, 4);
     *(send + 4) = code;
     memcpy(send + 5, bytes, size);
@@ -114,6 +114,9 @@ void socket_read(unsigned char buffer[], int buff_size)
             {
             case HEADER_INFO_FTN:
                 setHeaderFromJson(*(tcpData.event_list + i) + 1);
+                break;
+            case ACQ_LASER_ON_FTN:
+                laserOn();
                 break;
             case ACQ_INFO_FTN:
                 setAcqInfoFromJson(*(tcpData.event_list + i) + 1);
@@ -212,6 +215,24 @@ void socket_read(unsigned char buffer[], int buff_size)
                 tryCopyFiles(*(tcpData.event_list + i) + 1);
                 socket_write(ANA_USB_COPY_DONE_NTF, "", 0);
                 break;
+            case ANA_LOAD_FILE_FTN:
+                sendFileData(*(tcpData.event_list + i) + 1);
+                socket_write(ANA_LOAD_FILE_NTF, "", 0);
+                break;
+            case ANA_LOAD_FILE_WITH_CONFIG_FTN:
+                sendFileData(*(tcpData.event_list + i) + 1);
+                socket_write(ANA_LOAD_FILE_WITH_CONFIG_NTF, "", 0);
+                break;
+            case ANA_LOAD_CONFIG_FILE_FTN:
+                sendLoadConfiFile(*(tcpData.event_list + i) + 1);
+                break;
+            case ANA_SAVE_CONFIG_FILE_FTN:
+                sendSaveConfigFile(*(tcpData.event_list + i) + 1);
+                break;
+            case ANA_LOAD_TOP_VIEW_FNT:
+                sendFileData(*(tcpData.event_list + i) + 1);
+                socket_write(ANA_LOAD_TOP_VIEW_NTF, "", 0);
+                break;
             default:
                 break;
             }
@@ -225,5 +246,6 @@ void socket_read(unsigned char buffer[], int buff_size)
 void socket_close()
 {
     stopAcq();
+    laserOff();
     // printf("close :%d \n", tcpData.total_length);
 }

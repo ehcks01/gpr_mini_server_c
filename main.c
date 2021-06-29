@@ -35,17 +35,16 @@ int main()
         printf("Socket initialization failed\n");
         return 0;
     }
-    usleep(1); //printf문 띄울려고..
     
     while (1)
     {
         char buff_rcv[1024];
         int buff_size;
+        usleep(1);
         if (!socket_client_accept())
         {
             continue;
         }
-        usleep(1); //printf문 띄울려고..
         socket_write(CONNECTION_NTF, "", 0);
         while ((buff_size = socket_receive(buff_rcv)) > 0)
         {

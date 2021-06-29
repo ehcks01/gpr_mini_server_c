@@ -8,6 +8,7 @@
 #include "gpr_socket_ana.h"
 #include "gpr_socket.h"
 #include "gpr_socket_protocol.h"
+#include "gpr_socket_data.h"
 #include "../common/cJSON.h"
 #include "../common/dir_control.h"
 #include "../common/gpr_param.h"
@@ -130,4 +131,82 @@ void tryCopyFiles(char *bytes)
     {
         socket_write(ANA_USB_INFO_FAILED_NTF, "", 0);
     }
+}
+
+void sendFileData(char *path)
+{
+    FILE *fileptr;
+    int filelen, fileLentDivideCnt, fileLentDivideRest, sendBufferSize = 2048;
+    char fileSizeToBytes[4];
+    char sendBuffer[sendBufferSize];
+
+    fileptr = fopen(path, "rb");
+    fseek(fileptr, 0, SEEK_END);
+    filelen = ftell(fileptr);
+    rewind(fileptr);
+
+    //파일 사이즈를 먼저 보냄
+    intToBytes(filelen, fileSizeToBytes, 4);
+    socket_write(ANA_FILE_SIZE_NTF, fileSizeToBytes, 4);
+
+    //파일 데이터를 쪼개서 보냄
+    fileLentDivideCnt = filelen / sendBufferSize;
+    fileLentDivideRest = filelen % sendBufferSize;
+    for (int i = 0; i < fileLentDivideCnt; i++)
+    {
+        fread(sendBuffer, sendBufferSize, 1, fileptr);
+        socket_write(ANA_FILE_DATA_NTF, sendBuffer, sendBufferSize);
+    }
+    if (fileLentDivideRest > 0)
+    {
+        fread(sendBuffer, fileLentDivideRest, 1, fileptr);
+        socket_write(ANA_FILE_DATA_NTF, sendBuffer, fileLentDivideRest);
+    }
+    fclose(fileptr);
+}
+
+void sendLoadConfiFile(char *path)
+{
+    FILE *fileptr;
+    char *buffer;
+    int filelen;
+
+    printf("load config: %s \n", path);
+    fileptr = fopen(path, "r");
+    if (fileptr != NULL)
+    {
+        fseek(fileptr, 0, SEEK_END);
+        filelen = ftell(fileptr);
+        rewind(fileptr);
+
+        buffer = (char *)malloc(filelen * sizeof(char));
+        fread(buffer, filelen, 1, fileptr);
+        socket_write(ANA_LOAD_CONFIG_FILE_NTF, buffer, filelen);
+        free(buffer);
+        fclose(fileptr);
+    }
+    else
+    {
+        socket_write(ANA_LOAD_CONFIG_FILE_NTF, "", 0);
+    }
+}
+
+void sendSaveConfigFile(char *bytes)
+{
+    cJSON *json = cJSON_Parse(bytes);
+    if (json != NULL)
+    {
+        char *path = cJSON_GetObjectItem(json, "path")->valuestring;
+        printf("save config: %s \n", path);
+        char *content = cJSON_GetObjectItem(json, "content")->valuestring;
+
+        FILE *fptr = fopen(path, "w+");
+        if (fptr != NULL)
+        {
+            fwrite(content, strlen(content), 1, fptr);
+            fclose(fptr);
+        }
+        cJSON_Delete(json);
+    }
+    socket_write(ANA_SAVE_CONFIG_FILE_NTF, "", 0);
 }
