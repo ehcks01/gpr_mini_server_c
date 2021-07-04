@@ -3,15 +3,32 @@
 
 #include <stdbool.h>
 
+struct ThreadSendFileInfo
+{
+	char socketCode;
+    char *path;
+    FILE *filePtr;
+};
+
+pthread_t fileThread;
+pthread_t usbThread;
+
 void sendRootDir();
 void sendDiskSize();
 void sendReadDir(char *path, char protocol, bool repeat);
 void sendDeleteFile(char *path);
 void sendDeleteFolder(char *path);
 void sendUsbInFo();
-void tryCopyFiles(char *bytes);
-void sendFileData(char *path);
+void *tryCopyFiles(void *arg);
+void *sendFileData(void *arg);
 void sendLoadConfiFile(char *path);
 void sendSaveConfigFile(char *bytes);
 
+void fileSendCleanUp(void *arg);
+void threadSendFileData(char *path, char responeSocketCode);
+void threadSendFileCancel();
+
+void usbCopyCleanUp(void *arg);
+void threadUsbCopy(char *bytes);
+void threadUsbCopyCancel();
 #endif

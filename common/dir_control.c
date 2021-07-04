@@ -12,20 +12,31 @@
 #include "cJSON.h"
 #include "usb_control.h"
 
-char *strRealPath;
+char strRealPath[50];     //경로까지
+char strExeName[50]; //실행 파일 이름
 
-bool initRealPath()
+bool initRealPath(char *argv0)
 {
-    char pathBuf[4096];
-    char *res = realpath(".", pathBuf);
+    char *res = realpath(argv0, strRealPath);
+
     if (!res)
     {
         return false;
     }
     else
     {
-        strRealPath = malloc(strlen(pathBuf));
-        strcpy(strRealPath, pathBuf);
+        char copyStr[50];
+        strcpy(copyStr, res);
+        char *ptr = strtok(res, "/");
+        char *lastPtr = ptr;
+        while ((ptr = strtok(NULL, "/")) != NULL)
+        {
+            lastPtr = ptr;
+        }
+        size_t reSize = strlen(copyStr) - strlen(lastPtr) - 1;
+        memset(res, 0, sizeof(res));
+        strncpy(res, copyStr, reSize);
+        strcpy(strExeName, lastPtr);
         return true;
     }
 }
@@ -83,7 +94,8 @@ bool copyFile(const char *to, const char *from)
         char *out_ptr = buf;
         ssize_t nwritten;
 
-        do {
+        do
+        {
             nwritten = write(fd_to, out_ptr, nread);
 
             if (nwritten >= 0)
@@ -111,7 +123,7 @@ bool copyFile(const char *to, const char *from)
         return true;
     }
 
-  out_error:
+out_error:
     saved_errno = errno;
 
     close(fd_from);
@@ -171,7 +183,6 @@ void deleteDirList(cJSON *list)
 void addDirInfo(cJSON *root, char *path)
 {
     struct stat stat_path;
-    size_t path_len;
 
     if (root == NULL)
     {
@@ -204,7 +215,6 @@ void getDirList(cJSON *root, char *path, bool repet)
     DIR *dir;
     struct dirent *entry;
     struct stat stat_path, stat_entry;
-    size_t path_len;
 
     if (root == NULL)
     {
@@ -228,9 +238,6 @@ void getDirList(cJSON *root, char *path, bool repet)
         fprintf(stderr, "%s: %s\n", "Can`t open directory", path);
         return;
     }
-
-    // the length of the path
-    path_len = strlen(path);
 
     while ((entry = readdir(dir)) != NULL)
     {
@@ -287,54 +294,39 @@ char *getFileNameFromPath(char *path)
     return pFileName;
 }
 
-char *getDiskSize(char *path, bool isUsb)
+cJSON *getDiskSize(char *path)
 {
-    FILE *f;
-    char *buf;
-    cJSON *root;
+    FILE *file;
+    char buf[1024];
+    cJSON *root = NULL;
 
-    char *command = "df -h";
-    f = popen(command, "r");
-    if (f == NULL)
+    char command[50];
+    strcpy(command, "df -hT ");
+    strcat(command, path);
+    strcat(command, " | grep ");
+    strcat(command, path);
+    file = popen(command, "r");
+    if (file == NULL)
     {
         return NULL;
     }
-    root = cJSON_CreateObject();
-    buf = malloc(1024);
-    // Filesystem      Size  Used Avail Use% Mounted on
-    // /dev/sda1        15G   40K   15G   1% /home/gpr_mini_zero/usb
-    while (fgets(buf, 1024, f) != NULL)
+    // /dev/root      ext4   29G  1.8G   27G   7% /
+    if (fgets(buf, 1024, file) != NULL)
     {
-        char *ptr = strstr(buf, path);
+        root = cJSON_CreateObject();
+        char *ptr = strtok(buf, " ");
+        ptr = strtok(NULL, " ");
+        ptr = strtok(NULL, " ");
         if (ptr != NULL)
         {
-            ptr = strtok(buf, " ");
+            cJSON_AddItemToObject(root, "total", cJSON_CreateString(ptr));
             ptr = strtok(NULL, " ");
             if (ptr != NULL)
             {
-                cJSON_AddItemToObject(root, "total", cJSON_CreateString(ptr));
-                ptr = strtok(NULL, " ");
-                if (ptr != NULL)
-                {
-                    cJSON_AddItemToObject(root, "free", cJSON_CreateString(ptr));
-                }
+                cJSON_AddItemToObject(root, "free", cJSON_CreateString(ptr));
             }
-            break;
         }
     }
-
-    if (isUsb)
-    {
-        char *model = getUsbDiskModel();
-        cJSON_AddItemToObject(root, "model", cJSON_CreateString(model));
-        free(model);
-    }
-
-    char *out = cJSON_Print(root);
-
-    cJSON_Delete(root);
-    pclose(f);
-    free(buf);
-
-    return out;
+    pclose(file);
+    return root;
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 
@@ -9,86 +10,113 @@
 #include "gpr_param.h"
 
 struct UsbData usbData;
+const int deviceNameCnt = 10;
+char *deviceName[10] = {"sda", "sdb", "sdc", "sdd", "sde", "sdf", "sdg", "sdh", "sdi", "sdj"};
 
 bool initUsbMountPath()
 {
     char *usbPath = "/usb";
-    int pathlen = strlen(strRealPath) + strlen(usbPath) + 1;
-
-    usbData.usbMountPath = (char *)calloc(pathlen, 1);
-    strcpy(usbData.usbMountPath, strRealPath);
-    strcat(usbData.usbMountPath, usbPath);
-
-    mkdirs(usbData.usbMountPath);
+    strcpy(usbData.mountPath, strRealPath);
+    strcat(usbData.mountPath, usbPath);
+    mkdirs(usbData.mountPath);
     return true;
 }
 
-void setUsbFsType()
+char *getUsbInfo()
 {
-    FILE *file;
-    char *buf;
-
-    memset(usbData.usbFsType, 0, sizeof(usbData.usbFsType));
-    file = popen("lsblk -f /dev/sda1", "r");
-    if (file == NULL)
+    tryUsbUmount();
+    char *out = NULL;
+    for (int i = 0; i < deviceNameCnt; i++)
     {
-        return;
-    }
-    buf = malloc(1024);
-    
-    while (fgets(buf, 1024, file) != NULL)
-    {
-        char *ptr = strstr(buf, "ext4");
-        if (ptr != NULL)
+        if (findUsb(deviceName[i]) && tryUsbMount())
         {
-            memcpy(usbData.usbFsType, "ext4", strlen("ext4"));
-            break;
-        }
-        ptr = strstr(buf, "ext3");
-        if (ptr != NULL)
-        {
-            memcpy(usbData.usbFsType, "ext3", strlen("ext3"));
-            break;
-        }
-
-        ptr = strstr(buf, "ntfs");
-        if (ptr != NULL)
-        {
-            memcpy(usbData.usbFsType, "ntfs", strlen("ntfs"));
-            break;
-        }
-
-        ptr = strstr(buf, "vfat");
-        if (ptr != NULL)
-        {
-            memcpy(usbData.usbFsType, "vfat", strlen("vfat"));
-            break;
-        }
-
-        ptr = strstr(buf, "exfat");
-        if (ptr != NULL)
-        {
-            memcpy(usbData.usbFsType, "exfat", strlen("exfat"));
+            printf("find USB: %s\n", usbData.diskModel);
+            char path[15];
+            strcpy(path, "/dev/");
+            strcat(path, deviceName[i]);
+            strcat(path, "1");
+            cJSON *root = getDiskSize(path);
+            if (root != NULL)
+            {
+                printf("usb disk size\n");
+                cJSON_AddItemToObject(root, "model", cJSON_CreateString(usbData.diskModel));
+                out = cJSON_Print(root);
+                cJSON_Delete(root);
+            }
+            tryUsbUmount();
             break;
         }
     }
 
-    // printf("usbData.usbFsType: %s \n", usbData.usbFsType);
-    pclose(file);
-    free(buf);
+    return out;
+}
+
+bool findUsb(char name[])
+{
+    bool isFind = false;
+    char command[100] = "sudo lsblk -o MODEL,NAME,FSTYPE | grep ";
+    strcat(command, name);
+    FILE *file = popen(command, "r");
+    if (file != NULL)
+    {
+        char buf[100];
+        //ex) Storage_Device sda
+        if (fgets(buf, 100, file) != NULL)
+        {
+            strcpy(usbData.deviceName, name);
+            char *ptr = strtok(buf, " ");
+            if (ptr != NULL)
+            {
+                strcpy(usbData.diskModel, ptr);
+            }
+            //ex)└─sdb1      vfat
+            if (fgets(buf, 100, file) != NULL)
+            {
+                if (strstr(buf, "ext3") != NULL)
+                {
+                    strcpy(usbData.fsType, "ext3");
+                    isFind = true;
+                }
+                else if (strstr(buf, "ext4") != NULL)
+                {
+                    strcpy(usbData.fsType, "ext4");
+                    isFind = true;
+                }
+                else if (strstr(buf, "ntfs") != NULL)
+                {
+                    strcpy(usbData.fsType, "ntfs");
+                    isFind = true;
+                }
+                else if (strstr(buf, "vfat") != NULL)
+                {
+                    strcpy(usbData.fsType, "vfat");
+                    isFind = true;
+                }
+                else if (strstr(buf, "exfat") != NULL)
+                {
+                    strcpy(usbData.fsType, "exfat");
+                    isFind = true;
+                }
+            }
+        }
+        pclose(file);
+    }
+    return isFind;
 }
 
 bool tryUsbMount()
 {
-    setUsbFsType();
-    if (usbData.usbFsType[0] == 0)
+    if (usbData.fsType[0] == 0)
     {
         return false;
     }
-    mkdirs(usbData.usbMountPath);
+    mkdirs(usbData.mountPath);
 
-    int mounting;
-    mounting = mount("/dev/sda1", usbData.usbMountPath, usbData.usbFsType, MS_SYNCHRONOUS | MS_DIRSYNC, NULL);
+    char usbPath[15];
+    strcpy(usbPath, "/dev/");
+    strcat(usbPath, usbData.deviceName);
+    strcat(usbPath, "1");
+    int mounting = mount(usbPath, usbData.mountPath, usbData.fsType, MS_SYNCHRONOUS | MS_DIRSYNC, NULL);
 
     if (mounting == 0)
     {
@@ -100,46 +128,14 @@ bool tryUsbMount()
     }
 }
 
-bool tryUsbUmount()
+void tryUsbUmount()
 {
-    int umounting = umount(usbData.usbMountPath);
-    if (umounting == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-char *getUsbDiskModel()
-{
-    FILE *f;
-    char *buf, *out;
-
-    f = popen("fdisk -l /dev/sda", "r");
-    if (f == NULL)
-    {
-        return NULL;
-    }
-    buf = malloc(1024);
-
-    while (fgets(buf, 1024, f) != NULL)
-    {
-        char *ptr = strstr(buf, "Disk model:  ");
-        if (ptr != NULL)
-        {
-            char *temp = ptr + strlen("Disk model:  ");
-            out = malloc(strlen(temp));
-            strcpy(out, temp);
-            break;
-        }
-    }
-    pclose(f);
-    free(buf);
-
-    return out;
+    int umounting = umount(usbData.mountPath);
+    char command[50];
+    strcpy(command, "umount -l ");
+    strcat(command, usbData.mountPath);
+    FILE *file = popen(command, "r");
+    pclose(file);
 }
 
 char *changeSDPathToUsbPath(char *sdPath)
@@ -147,9 +143,9 @@ char *changeSDPathToUsbPath(char *sdPath)
     char *restPath = sdPath + strlen(strRealPath);
     if (restPath != NULL)
     {
-        int path_len = strlen(usbData.usbMountPath) + strlen(restPath) + 1;
+        int path_len = strlen(usbData.mountPath) + strlen(restPath) + 1;
         char *movePath = (char *)malloc(path_len);
-        strcpy(movePath, usbData.usbMountPath);
+        strcpy(movePath, usbData.mountPath);
         strcat(movePath, restPath);
         return movePath;
     }
@@ -172,7 +168,7 @@ bool copyFileToUsb(char *path, char *name)
 
     //3. 파일을 usb로 복사
     usbPath = changeSDPathToUsbPath(path);
-    bool result =  copyFile(usbPath, path);
+    bool result = copyFile(usbPath, path);
     free(usbPath);
 
     return result;

@@ -13,7 +13,7 @@ void socket_client_done();
 void socket_server_done();
 void socket_write(char code, void *bytes, int size);
 void sendSavePath();
-void socket_read(unsigned char buffer[], int buff_size);
+void socket_read(char buffer[], int buff_size);
 void socket_close();
 
 #endif

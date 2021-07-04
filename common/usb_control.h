@@ -5,17 +5,18 @@
 
 struct UsbData
 {
-    char *usbMountPath;
-    char usbFsType[6];
+    char mountPath[50]; //mount 되는 경로
+    char deviceName[4]; //sda 같은 네임
+
+    char fsType[6]; //포맷 타입
+    char diskModel[50]; //usb model 이름
 };
 
-extern struct UsbData usbData;
-
 bool initUsbMountPath();
-void setUsbFsType();
+bool findUsb(char name[]);
+char *getUsbInfo();
 bool tryUsbMount();
-bool tryUsbUmount();
-char *getUsbDiskModel();
+void tryUsbUmount();
 char *changeSDPathToUsbPath();
 bool copyFileToUsb(char *path, char *name);
 void copyFolderToUsb(char *path);

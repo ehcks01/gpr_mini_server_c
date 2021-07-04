@@ -8,6 +8,6 @@ char *readNVAFile();
 void setNVASetting(char *bytes);
 void loadNVASetting();
 
-extern char *strNVAPath;
+extern char strNVAPath[50];
 #endif
 

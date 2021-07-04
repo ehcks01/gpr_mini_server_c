@@ -13,9 +13,10 @@ void deleteDirList(cJSON *list);
 void addDirInfo(cJSON *root, char *path);
 void getDirList(cJSON* root, char *path, bool repet);
 char *getFileNameFromPath(char *path);
-char *getDiskSize(char *path, bool isUsb);
-bool initRealPath();
+cJSON *getDiskSize(char *path);
+bool initRealPath(char *argv0);
 
-extern char *strRealPath;
+extern char strRealPath[50];
+extern char strExeName[50];
 
 #endif

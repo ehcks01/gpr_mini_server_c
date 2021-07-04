@@ -24,6 +24,7 @@ SET ( SRC_FILES
         NVA/NVA_CON.c
         NVA/NVA_file.c
         NVA/NVA6100.c
+        NVA/GPR_TimingMeasurement.c
         gpr_socket/gpr_socket_acq.c
         gpr_socket/gpr_socket_ana.c
         gpr_socket/gpr_socket.c

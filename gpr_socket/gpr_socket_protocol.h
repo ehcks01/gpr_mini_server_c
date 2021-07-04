@@ -31,6 +31,13 @@ enum SocketProtocol
     ACQ_REFRESH_NTF = 0x1A,
     ACQ_BACK_DATA_NTF = 0x1B,
 
+    //wifi 채널 리스트 요청
+    WIFI_CHANNEL_LIST_FTN = 0x21,
+    WIFI_CHANNEL_LIST_NTF = 0x22,
+    WIFI_CHANNEL_CHANGE_FTN = 0x23,
+    //서버쪽에서 클라이언트보고 socket 종료 요청
+    SOCKET_CLOSE_NTF = 0x24,
+
     //NVA 세팅값 요청
     NVA_REQUEST_FTN = 0x25,
     //NVA 세팅값 보냄
@@ -88,6 +95,9 @@ enum SocketProtocol
     //topview를 볼 때
     ANA_LOAD_TOP_VIEW_FNT = 0x9B,
     ANA_LOAD_TOP_VIEW_NTF = 0x9C,
+    //file down cancel
+    ANA_LOAD_FILE_CANCEL_FTN = 0x9E,
+    ANA_USB_COPY_CANCEL_FTN = 0x9F,
 } socketProtocol;
 
 #endif

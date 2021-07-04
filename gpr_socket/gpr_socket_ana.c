@@ -4,6 +4,7 @@
 #include <sys/statvfs.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 #include "gpr_socket_ana.h"
 #include "gpr_socket.h"
@@ -26,8 +27,10 @@ void sendRootDir()
 
 void sendDiskSize()
 {
-    char *out = getDiskSize("/dev/root", false);
+    cJSON *root = getDiskSize("/root");
+    char *out = cJSON_Print(root);
     socket_write(ANA_DISK_SIZE_NTF, out, strlen(out));
+    cJSON_Delete(root);
     free(out);
 }
 
@@ -87,9 +90,9 @@ void sendDeleteFolder(char *path)
 
 void sendUsbInFo()
 {
-    if (tryUsbMount())
+    char *out = getUsbInfo();
+    if (out != NULL)
     {
-        char *out = getDiskSize("/dev/sda", true);
         socket_write(ANA_USB_INFO_NTF, out, strlen(out));
         free(out);
     }
@@ -97,14 +100,17 @@ void sendUsbInFo()
     {
         socket_write(ANA_USB_INFO_FAILED_NTF, "", 0);
     }
-    tryUsbUmount();
 }
 
-void tryCopyFiles(char *bytes)
+void *tryCopyFiles(void *arg)
 {
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    pthread_cleanup_push(usbCopyCleanUp, arg);
+
     if (tryUsbMount())
     {
-        cJSON *list = cJSON_Parse(bytes);
+        cJSON *list = arg;
         for (int i = cJSON_GetArraySize(list) - 1; i >= 0; i--)
         {
             cJSON *subitem = cJSON_GetArrayItem(list, i);
@@ -124,45 +130,67 @@ void tryCopyFiles(char *bytes)
                 }
             }
         }
-        cJSON_Delete(list);
-        tryUsbUmount();
+        socket_write(ANA_USB_COPY_DONE_NTF, "", 0);
     }
     else
     {
         socket_write(ANA_USB_INFO_FAILED_NTF, "", 0);
     }
+    pthread_cleanup_pop(arg);
 }
 
-void sendFileData(char *path)
+void fileSendCleanUp(void *arg)
 {
-    FILE *fileptr;
+    struct ThreadSendFileInfo *sendInfo = arg;
+    free(sendInfo->path);
+    fclose(sendInfo->filePtr);
+    free(sendInfo);
+}
+
+void threadSendFileCancel()
+{
+    pthread_cancel(fileThread);
+}
+
+void *sendFileData(void *arg)
+{
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    pthread_cleanup_push(fileSendCleanUp, arg);
+
     int filelen, fileLentDivideCnt, fileLentDivideRest, sendBufferSize = 2048;
     char fileSizeToBytes[4];
     char sendBuffer[sendBufferSize];
 
-    fileptr = fopen(path, "rb");
-    fseek(fileptr, 0, SEEK_END);
-    filelen = ftell(fileptr);
-    rewind(fileptr);
-
-    //파일 사이즈를 먼저 보냄
-    intToBytes(filelen, fileSizeToBytes, 4);
-    socket_write(ANA_FILE_SIZE_NTF, fileSizeToBytes, 4);
-
-    //파일 데이터를 쪼개서 보냄
-    fileLentDivideCnt = filelen / sendBufferSize;
-    fileLentDivideRest = filelen % sendBufferSize;
-    for (int i = 0; i < fileLentDivideCnt; i++)
+    struct ThreadSendFileInfo *sendInfo = arg;
+    printf("load filed: %s \n", sendInfo->path);
+    sendInfo->filePtr = fopen(sendInfo->path, "rb");
+    if (sendInfo->filePtr != NULL)
     {
-        fread(sendBuffer, sendBufferSize, 1, fileptr);
-        socket_write(ANA_FILE_DATA_NTF, sendBuffer, sendBufferSize);
+        fseek(sendInfo->filePtr, 0, SEEK_END);
+        filelen = ftell(sendInfo->filePtr);
+        rewind(sendInfo->filePtr);
+
+        //파일 사이즈를 먼저 보냄
+        intToBytes(filelen, fileSizeToBytes, 4);
+        socket_write(ANA_FILE_SIZE_NTF, fileSizeToBytes, 4);
+
+        //파일 데이터를 쪼개서 보냄
+        fileLentDivideCnt = filelen / sendBufferSize;
+        fileLentDivideRest = filelen % sendBufferSize;
+        for (int i = 0; i < fileLentDivideCnt; i++)
+        {
+            fread(sendBuffer, sendBufferSize, 1, sendInfo->filePtr);
+            socket_write(ANA_FILE_DATA_NTF, sendBuffer, sendBufferSize);
+        }
+        if (fileLentDivideRest > 0)
+        {
+            fread(sendBuffer, fileLentDivideRest, 1, sendInfo->filePtr);
+            socket_write(ANA_FILE_DATA_NTF, sendBuffer, fileLentDivideRest);
+        }
     }
-    if (fileLentDivideRest > 0)
-    {
-        fread(sendBuffer, fileLentDivideRest, 1, fileptr);
-        socket_write(ANA_FILE_DATA_NTF, sendBuffer, fileLentDivideRest);
-    }
-    fclose(fileptr);
+    socket_write(sendInfo->socketCode, "", 0);
+    pthread_cleanup_pop(arg);
 }
 
 void sendLoadConfiFile(char *path)
@@ -209,4 +237,41 @@ void sendSaveConfigFile(char *bytes)
         cJSON_Delete(json);
     }
     socket_write(ANA_SAVE_CONFIG_FILE_NTF, "", 0);
+}
+
+void threadSendFileData(char *path, char responeSocketCode)
+{
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
+    struct ThreadSendFileInfo *sendInfo = malloc(sizeof(struct ThreadSendFileInfo));
+    int pathLen = strlen(path);
+    sendInfo->path = calloc(pathLen + 1, 1);
+    strcpy(sendInfo->path, path);
+    sendInfo->socketCode = responeSocketCode;
+
+    pthread_create(&fileThread, &attr, sendFileData, sendInfo);
+    pthread_attr_destroy(&attr);
+}
+
+void threadUsbCopy(char *bytes)
+{
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    cJSON *list = cJSON_Parse(bytes);
+    pthread_create(&usbThread, &attr, tryCopyFiles, list);
+    pthread_attr_destroy(&attr);
+}
+
+void usbCopyCleanUp(void *arg)
+{
+    cJSON_Delete(arg);
+    tryUsbUmount();
+}
+
+void threadUsbCopyCancel()
+{
+    pthread_cancel(usbThread);
 }

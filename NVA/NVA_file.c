@@ -8,13 +8,11 @@
 #include "NVA6100.h"
 #include "NVA_file.h"
 
-char *strNVAPath;
+char strNVAPath[50];
 
 bool initNVAPath()
 {
     char *NVAPath = "/NVA_Setting";
-    int pathlen = strlen(strRealPath) + strlen(NVAPath) + 1;
-    strNVAPath = (char *)calloc(pathlen, 1);
     strcpy(strNVAPath, strRealPath);
     strcat(strNVAPath, NVAPath);
 

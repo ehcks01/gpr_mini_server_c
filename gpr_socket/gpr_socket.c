@@ -11,6 +11,7 @@
 #include "gpr_socket_protocol.h"
 #include "gpr_socket_acq.h"
 #include "gpr_socket_ana.h"
+#include "wifi_selector.h"
 #include "../NVA/NVA_CON.h"
 #include "../NVA/NVA_file.h"
 #include "../common/gpr_param.h"
@@ -102,7 +103,7 @@ void sendSavePath()
     free(str);
 }
 
-void socket_read(unsigned char buffer[], int buff_size)
+void socket_read(char buffer[], int buff_size)
 {
     // 받은 버퍼를 이벤트로 변환
     convertEvent(buffer, buff_size);
@@ -184,7 +185,7 @@ void socket_read(unsigned char buffer[], int buff_size)
                 setNVASetting(*(tcpData.event_list + i) + 1);
                 saveNVASetting();
                 socket_write(NVA_COMPLETE_NTF, "", 0);
-                GPR_Init(0);
+                NVA_TMVInit(0);
                 break;
             case ANA_ROOT_DIR_FTN:
                 sendRootDir();
@@ -212,16 +213,19 @@ void socket_read(unsigned char buffer[], int buff_size)
                 break;
             case ANA_USB_COPY_FTN:
                 socket_write(ANA_USB_COPY_NTF, "", 0);
-                tryCopyFiles(*(tcpData.event_list + i) + 1);
-                socket_write(ANA_USB_COPY_DONE_NTF, "", 0);
+                threadUsbCopy(*(tcpData.event_list + i) + 1);
+                break;
+            case ANA_USB_COPY_CANCEL_FTN:
+                threadUsbCopyCancel();
                 break;
             case ANA_LOAD_FILE_FTN:
-                sendFileData(*(tcpData.event_list + i) + 1);
-                socket_write(ANA_LOAD_FILE_NTF, "", 0);
+                threadSendFileData(*(tcpData.event_list + i) + 1, ANA_LOAD_FILE_NTF);
+                break;
+            case ANA_LOAD_FILE_CANCEL_FTN:
+                threadSendFileCancel();
                 break;
             case ANA_LOAD_FILE_WITH_CONFIG_FTN:
-                sendFileData(*(tcpData.event_list + i) + 1);
-                socket_write(ANA_LOAD_FILE_WITH_CONFIG_NTF, "", 0);
+                threadSendFileData(*(tcpData.event_list + i) + 1, ANA_LOAD_FILE_WITH_CONFIG_NTF);
                 break;
             case ANA_LOAD_CONFIG_FILE_FTN:
                 sendLoadConfiFile(*(tcpData.event_list + i) + 1);
@@ -230,8 +234,17 @@ void socket_read(unsigned char buffer[], int buff_size)
                 sendSaveConfigFile(*(tcpData.event_list + i) + 1);
                 break;
             case ANA_LOAD_TOP_VIEW_FNT:
-                sendFileData(*(tcpData.event_list + i) + 1);
-                socket_write(ANA_LOAD_TOP_VIEW_NTF, "", 0);
+                threadSendFileData(*(tcpData.event_list + i) + 1, ANA_LOAD_TOP_VIEW_NTF);
+                break;
+            case WIFI_CHANNEL_LIST_FTN:
+            {
+                char *out = getWifiInfoList();
+                socket_write(WIFI_CHANNEL_LIST_NTF, out, strlen(out));
+                free(out);
+                break;
+            }
+            case WIFI_CHANNEL_CHANGE_FTN:
+                changeWifiChannel(*(tcpData.event_list + i) + 1);
                 break;
             default:
                 break;
