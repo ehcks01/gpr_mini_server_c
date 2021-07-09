@@ -258,8 +258,8 @@ void NVA_VarInit(int deviceNumber)
 void NVA_Init(int deviceNumber)
 {
     NVA_KitConncetCheck(deviceNumber);
-    NVA_VarInit(deviceNumber);
-    // NVA_TMVInit(deviceNumber);
+    // NVA_VarInit(deviceNumber);
+    NVA_TMVInit(deviceNumber);
 }
 
 void NVA_TMVInit(int deviceNumber)
@@ -274,8 +274,8 @@ void NVA_TMVInit(int deviceNumber)
     float m_fReferenceTMV = 15.45;
 
     NVAParam.CoarseTuneAdjust = 0;
-    NVAParam.MediumTune = 0;
-    NVAParam.FineTune = 0;
+    NVAParam.MediumTuneAdjust = 0;
+    NVAParam.FineTuneAdjust = 0;
 
     // TMV값이 변동이 심하기 때문에 10번의 데이터를 취득한 후 평균을 사용한다.
     for (int i = 0; i < 10; i++)
@@ -295,12 +295,12 @@ void NVA_TMVInit(int deviceNumber)
     }
 
     if (Temp >= 0.031) {
-      NVAParam.MediumTune = (int)(Temp / 0.031);
-      Temp = Temp - NVAParam.MediumTune * 0.031;
+      NVAParam.MediumTuneAdjust = (int)(Temp / 0.031);
+      Temp = Temp - NVAParam.MediumTuneAdjust * 0.031;
     }
 
     if (Temp >= 0.0017) {
-      NVAParam.FineTune = (int)(Temp / 0.0017);
+      NVAParam.FineTuneAdjust = (int)(Temp / 0.0017);
     }
 
     // // If m_cGNDCut is off, 0cm is not the surface of the object.
