@@ -134,13 +134,6 @@ void changeWifiChannel(char *channel)
         fclose(Orifile);
     }
 
-    socket_write(SOCKET_CLOSE_NTF, "", 0);
     file = popen("sudo rm /etc/hostapd/hostapd.conf.ori", "r");
     pclose(file);
-
-    socket_client_done();
-    socket_server_done();
-    sprintf(buf, "sudo sh %s/host_restart.sh %s &", strRealPath, strExeName);
-    system(buf);
-    exit(0);
 }

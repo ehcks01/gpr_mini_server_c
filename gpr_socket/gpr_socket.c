@@ -19,6 +19,7 @@
 #include "../common/usb_control.h"
 
 int server_socket, client_socket;
+bool server_restart = false;
 
 bool socket_ready()
 {
@@ -245,6 +246,8 @@ void socket_read(char buffer[], int buff_size)
             }
             case WIFI_CHANNEL_CHANGE_FTN:
                 changeWifiChannel(*(tcpData.event_list + i) + 1);
+                server_restart = true;
+                socket_write(SOCKET_CLOSE_NTF, "", 0);
                 break;
             default:
                 break;

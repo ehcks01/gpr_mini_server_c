@@ -30,30 +30,41 @@ int main(char *argc, char *argv[])
         printf("Novelda initialization failed\n");
         // return 0;
     }
-    if (socket_ready() == false)
-    {
-        printf("Socket initialization failed\n");
-        return 0;
-    }
 
     while (1)
     {
-        char buff_rcv[1024];
-        int buff_size;
-        usleep(1);
-        if (!socket_client_accept())
+        if (socket_ready() == false)
         {
-            continue;
+            printf("Socket initialization failed\n");
+            break;
         }
-        socket_write(CONNECTION_NTF, "", 0);
-        while ((buff_size = socket_receive(buff_rcv)) > 0)
+        server_restart = false;
+
+        while (1)
         {
-            socket_read(buff_rcv, buff_size);
+            char buff_rcv[1024];
+            int buff_size;
+            usleep(1);
+            if (!socket_client_accept())
+            {
+                continue;
+            }
+            socket_write(CONNECTION_NTF, "", 0);
+            while ((buff_size = socket_receive(buff_rcv)) > 0)
+            {
+                socket_read(buff_rcv, buff_size);
+            }
+            socket_close();
+            socket_client_done();
+
+            if (server_restart)
+            {
+                sleep(2);
+                break;
+            }
         }
-        socket_close();
-        socket_client_done();
+        socket_server_done();
     }
-    socket_server_done();
-    
+
     return 0;
 }

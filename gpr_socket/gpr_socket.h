@@ -5,6 +5,7 @@
 
 #define PORT 4000
 extern int server_socket, client_socket;
+extern bool server_restart;
 
 bool socket_ready();
 int socket_client_accept();

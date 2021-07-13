@@ -258,8 +258,10 @@ void NVA_VarInit(int deviceNumber)
 void NVA_Init(int deviceNumber)
 {
     NVA_KitConncetCheck(deviceNumber);
-    // NVA_VarInit(deviceNumber);
-    NVA_TMVInit(deviceNumber);
+    if (NVAParam.ChipID == 0x0306)
+    {
+        NVA_TMVInit(deviceNumber);
+    }
 }
 
 void NVA_TMVInit(int deviceNumber)
@@ -294,13 +296,15 @@ void NVA_TMVInit(int deviceNumber)
         Temp = Temp - NVAParam.CoarseTuneAdjust;
     }
 
-    if (Temp >= 0.031) {
-      NVAParam.MediumTuneAdjust = (int)(Temp / 0.031);
-      Temp = Temp - NVAParam.MediumTuneAdjust * 0.031;
+    if (Temp >= 0.031)
+    {
+        NVAParam.MediumTuneAdjust = (int)(Temp / 0.031);
+        Temp = Temp - NVAParam.MediumTuneAdjust * 0.031;
     }
 
-    if (Temp >= 0.0017) {
-      NVAParam.FineTuneAdjust = (int)(Temp / 0.0017);
+    if (Temp >= 0.0017)
+    {
+        NVAParam.FineTuneAdjust = (int)(Temp / 0.0017);
     }
 
     // // If m_cGNDCut is off, 0cm is not the surface of the object.
