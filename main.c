@@ -59,11 +59,12 @@ int main(char *argc, char *argv[])
 
             if (server_restart)
             {
-                sleep(2);
                 break;
             }
         }
         socket_server_done();
+        pclose(popen("sudo service hostapd restart", "r"));
+        sleep(2);
     }
 
     return 0;

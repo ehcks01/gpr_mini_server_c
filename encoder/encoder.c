@@ -9,48 +9,29 @@
 #include "../gpr_socket/gpr_socket_acq.h"
 #include "../NVA/NVA_CON.h"
 
-void *queue_consume(void *arg)
-{
-    while (1)
-    {
-        if (!empty_queue())
-        {
-            char isFront = delete_queue();
-            if (acqCon.runAcq && (is2DScanMode() || isNotFull3DData()))
-            {
-                if (isFront)
-                {
-                    GPR_Capture_raw(0);
-                    frontRowData();
-                }
-                else
-                {
-                    backRowData();
-                }
-            }
-            printf("delete_queue: %d\n", front_queue);
-        }
-        usleep(1);
-    }
-
-    return NULL;
-}
+bool interruptCheck = false;
 
 void encoder_interrupt(void)
 {
-    if (acqCon.runAcq)
+    if (interruptCheck)
+    {
+        return;
+    }
+    interruptCheck = true;
+
+    if (acqCon.runAcq && (is2DScanMode() || isNotFull3DData()))
     {
         if (digitalRead(PIN1) == digitalRead(PIN2))
         {
-            printf("inc: %d\n", rear_queue);
-            add_queue(1);
+            GPR_Capture_raw(0);
+            frontRowData();
         }
         else
         {
-            printf("dec: %d\n", rear_queue);
-            add_queue(0);
+            backRowData();
         }
     }
+    interruptCheck = false;
 }
 
 bool wiringPi_ready()
@@ -76,7 +57,6 @@ bool wiringPi_ready()
     pinMode(PIN2, INPUT);
     pinMode(LASER_PIN, OUTPUT);
 
-    pthread_create(&threadID, NULL, queue_consume, NULL);
     printf("wiringPi setup completed..\n");
     return true;
 }

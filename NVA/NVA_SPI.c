@@ -7,7 +7,6 @@
 
 void SPI_Transfer(int deviceNumber, unsigned char tx[], int size)
 {
-    usleep(1);
     wiringPiSPIDataRW(SPI_CHANNEL, tx, size);
 }
 
@@ -96,7 +95,8 @@ int SPI_Read(int deviceNumber, unsigned char command, int length)
         SetReadBuffer(tx, command, arraySize, length);
 
         SPI_Transfer(deviceNumber, tx, arraySize);
-
+        //필요한지 아직 정확히 모르나 설정때는 여유 시간 줌
+        usleep(1);
         for (int i = 0; i < length; i++)
         {
             reslut += tx[i + 2];
