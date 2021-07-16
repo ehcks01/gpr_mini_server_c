@@ -85,17 +85,17 @@ int GetValue(struct DelayElement delayElement)
 {
     int value;
 
-    if (SampleResult.Flag & VAR_IS_LIVEREAD)
+    if (delayElement.Flag & VAR_IS_LIVEREAD)
     {
         value = SUCCESS;
     }
-    else if (SampleResult.Flag & VAR_IS_REGISTER_READ)
+    else if (delayElement.Flag & VAR_IS_REGISTER_READ)
     {
         value = SPI_Read(0, TIMING_CALIBRATION_RESULT, 1);
     }
     else
     {
-        value = SampleResult.Value;
+        value = delayElement.Value;
     }
 
     return value;
@@ -223,7 +223,7 @@ float GPR_TimingMeasurementValueLiveRead(int deviceNumber)
     int edge_at;
     float timingValue = 0;
 
-     NVA_VarInit(deviceNumber);
+    NVA_VarInit(deviceNumber);
     GPR_Capture_raw(deviceNumber);
 
     // Find a high level first

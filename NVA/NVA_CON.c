@@ -76,10 +76,10 @@ void NVA_VarInit(int deviceNumber)
     }
 
     // ThresholderPowerdown: [1]: Manual power down, [0]: Disable Automatic power down
-    SPI_Write(deviceNumber, THRESHOLDER_POWER_DOWN, 1, 0x01);
+    SPI_Write(deviceNumber, THRESHOLDER_POWER_DOWN, 1, 0x0001);
 
     // SamplerInputCtrl:
-    SPI_Write(deviceNumber, SAMPLER_INPUT_CTRL, 1, 0x00);
+    SPI_Write(deviceNumber, SAMPLER_INPUT_CTRL, 1, 0x0000);
 
     // ThresholderCtrl, Selecting gain
     if (NVAParam.Gain == 7)
@@ -125,25 +125,25 @@ void NVA_VarInit(int deviceNumber)
     SPI_Write(deviceNumber, NORMAL_PULSES_PER_STEP, 4, 0x01);
 
     // DACFirstInterationSetupTime:
-    SPI_Write(deviceNumber, DAC_FIRST_ITERATION_SETUP_TIME, 2, 0x00);
+    SPI_Write(deviceNumber, DAC_FIRST_ITERATION_SETUP_TIME, 2, 0x0000);
 
     // DACFirstStepSetupTime:
-    SPI_Write(deviceNumber, DAC_FIRST_STEP_SETUP_TIME, 2, 0x00);
+    SPI_Write(deviceNumber, DAC_FIRST_STEP_SETUP_TIME, 2, 0x0000);
 
     // DACRegularSetupTime:
-    SPI_Write(deviceNumber, DAC_REGULAR_SETUP_TIME, 2, 0x00);
+    SPI_Write(deviceNumber, DAC_REGULAR_SETUP_TIME, 2, 0x0000);
 
     // DACLastIterationHoldTime:
-    SPI_Write(deviceNumber, DAC_LAST_ITERATION_HOLD_TIME, 2, 0x00);
+    SPI_Write(deviceNumber, DAC_LAST_ITERATION_HOLD_TIME, 2, 0x0000);
 
     // DACLastStepHoldTime
-    SPI_Write(deviceNumber, DAC_LAST_STEP_HOLD_TIME, 2, 0x00);
+    SPI_Write(deviceNumber, DAC_LAST_STEP_HOLD_TIME, 2, 0x0000);
 
     // DACRegularHoldTime
-    SPI_Write(deviceNumber, DAC_REGULAR_HOLD_TIME, 2, 0x00);
+    SPI_Write(deviceNumber, DAC_REGULAR_HOLD_TIME, 2, 0x0000);
 
     // SweepMainCTRL
-    SPI_Write(deviceNumber, SWEEP_MAIN_CTRL, 1, 0x01);
+    SPI_Write(deviceNumber, SWEEP_MAIN_CTRL, 1, 0x0001);
 
     // DACMax: Default: 5734 -> 0x1666
     SPI_Write(deviceNumber, DAC_MAX, 2, NVAParam.DACMax);
@@ -165,14 +165,14 @@ void NVA_VarInit(int deviceNumber)
 
     // FocusSetupTime: Setup time, in MCLK periods,
     // for the Focus signal going from the sweep controller to the sampler
-    SPI_Write(deviceNumber, FOCUS_SETUP_TIME, 1, 0x00);
+    SPI_Write(deviceNumber, FOCUS_SETUP_TIME, 1, 0x0000);
 
     // FocusHoldTime: Hold time, in MCLK periods,
     // for the focus signal going from the sweep controller to the sampler
-    SPI_Write(deviceNumber, FOCUS_HOLD_TIME, 1, 0x00); //
+    SPI_Write(deviceNumber, FOCUS_HOLD_TIME, 1, 0x0000); //
 
     // SweepClkCTRL:
-    SPI_Write(deviceNumber, SWEEP_CLK_CTRL, 1, 0x00); //
+    SPI_Write(deviceNumber, SWEEP_CLK_CTRL, 1, 0x0000); //
 
     // PGCtrl: 573333
     // [7:6] 0: Pulse generator is turned off, 1: Low-band pulse generator, 2: Medium-band pulse generator, 3: Pulse generator is turned off
@@ -202,7 +202,7 @@ void NVA_VarInit(int deviceNumber)
     // Staggered PRFDelay:
     // [7:0] Delay the sample signal by 0-255 divide clock periods
     // Default: 0
-    SPI_Write(deviceNumber, STAGGERED_PRF_DELAY, 1, 0x00);
+    SPI_Write(deviceNumber, STAGGERED_PRF_DELAY, 1, 0x0000);
 
     // LFSRnT
     SPI_Write(deviceNumber, LFSR5_TAP_ENABLE, 2, 0x4f20);
@@ -213,7 +213,7 @@ void NVA_VarInit(int deviceNumber)
     SPI_Write(deviceNumber, LFSR0_TAP_ENABLE, 2, 0x4120);
 
     // TimingCtrl
-    SPI_Write(deviceNumber, TIMING_CTRL, 1, 0x00);
+    SPI_Write(deviceNumber, TIMING_CTRL, 1, 0x0000);
 
     // SampleDelayCoarseTune
     // [8:0] Sample Delay Coarse Tune: Delays the sample signal using 0-351 delay elements, each with a delay of ~1ns.
@@ -233,26 +233,26 @@ void NVA_VarInit(int deviceNumber)
 
     // SendPulseDelayCoarseTune
     // [8:0]: Send Pulse Delay Coarse Tune: Delays the send pulse signal using 0-351 delay elements, each with a delay of ~1ns.
-    SPI_Write(deviceNumber, SEND_PULSE_DELAY_COARSE_TUNE, 2, 0x00);
+    SPI_Write(deviceNumber, SEND_PULSE_DELAY_COARSE_TUNE, 2, 0x0000);
 
     // SendSampleDelayMediumTune
     // [5:0] Sample Delay Mdeium Tune: Delays the pulse signal using 0-63 delay elements, each with a delay of ~31ps.
-    SPI_Write(deviceNumber, SEND_PULSE_DELAY_MEDIUM_TUNE, 1, 0x00);
+    SPI_Write(deviceNumber, SEND_PULSE_DELAY_MEDIUM_TUNE, 1, 0x0000);
 
     // SendSampleDelayFineTune
     // [5:0] Sample Delay Fine Tune: Delays the pulse signal using 0-63 delay elements, each with a delay of ~1.7ps.
-    SPI_Write(deviceNumber, SEND_PULSE_DELAY_FINE_TUNE, 1, 0x00);
+    SPI_Write(deviceNumber, SEND_PULSE_DELAY_FINE_TUNE, 1, 0x0000);
 
     // Timing CalibrationCtrl
     // [0]: 1: N/A, 0: SendPulse signal
     // Default: 0
-    SPI_Write(deviceNumber, TIMING_CALIBRATION_CTRL, 1, 0x00);
+    SPI_Write(deviceNumber, TIMING_CALIBRATION_CTRL, 1, 0x0000);
 
     // MClkOutputCtrl
     // [1]: MclkDelayedOutEnable
     // [0]: MclkDelayedOutsource: 0: Sample signal, 1: SendPulse signal
     // Default: 0x0001
-    SPI_Write(deviceNumber, MCLK_OUTPUT_CTRL, 8, 0x01);
+    SPI_Write(deviceNumber, MCLK_OUTPUT_CTRL, 1, 0x0001);
 }
 
 void NVA_Init(int deviceNumber)
