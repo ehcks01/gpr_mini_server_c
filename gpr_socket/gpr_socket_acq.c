@@ -151,6 +151,12 @@ void startAcq()
 
 void frontRowData()
 {
+    //취득 시간
+    struct timeval time;
+    gettimeofday(&time, NULL);
+    double start_ms = (double)time.tv_sec * 1000000 + (double)time.tv_usec;
+    memcpy(acqCon.NVA_readData + fixDepthDataSize, &start_ms, sizeof(start_ms));
+
     acqCon.dataCnt++;
     fwrite(acqCon.NVA_readData, 1, sizeof(acqCon.NVA_readData), acqCon.fp);
     socket_write(ACQ_DATA_NTF, acqCon.NVA_readData, sizeof(acqCon.NVA_readData));
