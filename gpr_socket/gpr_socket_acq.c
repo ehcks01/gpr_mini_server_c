@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <wiringPi.h>
+#include <sys/time.h>
 
 #include "gpr_socket_acq.h"
 #include "gpr_socket.h"
@@ -158,7 +159,7 @@ void frontRowData()
     memcpy(acqCon.NVA_readData + fixDepthDataSize, &start_ms, sizeof(start_ms));
 
     acqCon.dataCnt++;
-    fwrite(acqCon.NVA_readData, 1, sizeof(acqCon.NVA_readData), acqCon.fp);
+    fwrite(acqCon.NVA_readData, 1, fixDepthDataSize, acqCon.fp);
     socket_write(ACQ_DATA_NTF, acqCon.NVA_readData, sizeof(acqCon.NVA_readData));
 }
 

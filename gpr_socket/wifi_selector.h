@@ -96,44 +96,43 @@ char *getWifiInfoList()
 
 void changeWifiChannel(char *channel)
 {
-    FILE *Orifile, *file;
+    FILE *copyFile, *oriFile;
     char buf[1024];
 
-    file = popen("sudo mv /etc/hostapd/hostapd.conf /etc/hostapd/hostapd.conf.ori", "r");
-    pclose(file);
-    file = popen("sudo chmod 777 /etc/hostapd/hostapd.conf.ori", "r");
-    pclose(file);
+    pclose(popen("sudo chmod 777 /etc/hostapd/hostapd.conf", "r"));
 
-    file = fopen("/etc/hostapd/hostapd.conf", "w");
-    Orifile = fopen("/etc/hostapd/hostapd.conf.ori", "r");
+    oriFile = fopen("/etc/hostapd/hostapd.conf", "r");
+    copyFile = fopen("/etc/hostapd/hostapd.conf.copy", "w");
 
-    if (file != NULL && Orifile != NULL)
+    if (oriFile != NULL && copyFile != NULL)
     {
-        while (fgets(buf, 1024, Orifile) != NULL)
+        while (fgets(buf, 1024, oriFile) != NULL)
         {
             if (strstr(buf, "channel=") != NULL)
             {
                 char str[20];
                 sprintf(str, "channel=%s\n", channel);
-                fprintf(file, str);
+                fprintf(copyFile, str);
             }
             else
             {
-                fprintf(file, buf);
+                fprintf(copyFile, buf);
             }
         }
+        pclose(popen("sudo mv /etc/hostapd/hostapd.conf.copy /etc/hostapd/hostapd.conf", "r"));
+        fclose(copyFile);
+        fclose(oriFile);
     }
-
-    if (file != NULL)
+    else
     {
-        fclose(file);
-    }
+        if (copyFile != NULL)
+        {
+            fclose(copyFile);
+        }
 
-    if (Orifile != NULL)
-    {
-        fclose(Orifile);
+        if (oriFile != NULL)
+        {
+            fclose(oriFile);
+        }
     }
-
-    file = popen("sudo rm /etc/hostapd/hostapd.conf.ori", "r");
-    pclose(file);
 }
