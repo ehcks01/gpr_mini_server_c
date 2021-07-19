@@ -112,9 +112,12 @@ void endFileWrite()
 
 void deleteAcqFile()
 {
-    char *path = getFullPath(acqCon.savePath, acqCon.fileName);
-    deleteFile(path);
-    free(path);
+    if (acqCon.savePath != NULL && acqCon.fileName != NULL)
+    {
+        char *path = getFullPath(acqCon.savePath, acqCon.fileName);
+        deleteFile(path);
+        free(path);
+    }
 }
 
 void deleteAcq3DFolder()

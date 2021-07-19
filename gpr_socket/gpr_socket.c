@@ -114,6 +114,13 @@ void socket_read(char buffer[], int buff_size)
         {
             switch (tcpData.event_list[i][0])
             {
+            case SERVER_INFO_FNT:
+            {
+                //임시로 이렇게 해놈.. 나중엔 진짜 배터리값으로
+                int random = rand() % 100;
+                socket_write(SERVER_INFO_NTF, &random, 1);
+                break;
+            }
             case HEADER_INFO_FTN:
                 setHeaderFromJson(*(tcpData.event_list + i) + 1);
                 break;

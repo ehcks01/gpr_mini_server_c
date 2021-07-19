@@ -10,13 +10,14 @@ enum SocketProtocol
     //서버로 보내는 Header 정보
     HEADER_INFO_FTN = 0x03,
     //각종 상태 체크(배터리, 안테나 등)
-    SERVER_INFO_NTF = 0x04,
+    SERVER_INFO_FNT = 0x04,
+    SERVER_INFO_NTF = 0x05,
     //취득 정보 받음
-    ACQ_INFO_FTN = 0x05,
+    ACQ_INFO_FTN = 0x06,
     //저장 경로 보냄
-    ACQ_SAVE_PATH_NTF = 0x06,
+    ACQ_SAVE_PATH_NTF = 0x07,
     //레이저 on 요청
-    ACQ_LASER_ON_FTN = 0x07,
+    ACQ_LASER_ON_FTN = 0x08,
 
     //취득 시작
     ACQ_START_FTN = 0x11,
