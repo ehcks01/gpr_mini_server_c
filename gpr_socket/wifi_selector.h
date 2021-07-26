@@ -60,7 +60,7 @@ char *getWifiInfoList()
     pclose(file);
 
     char *currentStr = "";
-    file = popen("iw wlan0 info | grep channel", "r");
+    file = popen("sudo iw wlan0 info | grep channel", "r");
     if (file != NULL)
     {
         //ex) channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz

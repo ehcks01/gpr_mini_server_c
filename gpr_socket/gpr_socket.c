@@ -5,6 +5,7 @@
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 
 #include "gpr_socket.h"
 #include "gpr_socket_data.h"
@@ -62,6 +63,12 @@ int socket_client_accept()
     if (-1 == client_socket)
     {
         printf("client accept failed\n");
+        return false;
+    }
+    if (-1 == tcpSetKeepAlive(client_socket, 1, 1, 3, 1))
+    {
+        printf("client tcpSetKeepAlive failed\n");
+        socket_client_done();
         return false;
     }
     char *str = inet_ntoa(client_addr.sin_addr);
@@ -271,4 +278,38 @@ void socket_close()
     stopAcq();
     laserOff();
     // printf("close :%d \n", tcpData.total_length);
+}
+
+int tcpSetKeepAlive(int nSockFd_, int nKeepAlive_, int nKeepAliveIdle_, int nKeepAliveCnt_, int nKeepAliveInterval_)
+{
+    int nRtn;
+
+    nRtn = setsockopt(nSockFd_, SOL_SOCKET, SO_KEEPALIVE, &nKeepAlive_, sizeof(nKeepAlive_));
+    if (nRtn == -1)
+    {
+        printf("[TCP server]Fail: setsockopt():so_keepalive\n");
+        return -1;
+    }
+
+    nRtn = setsockopt(nSockFd_, SOL_TCP, TCP_KEEPIDLE, &nKeepAliveIdle_, sizeof(nKeepAliveIdle_));
+    if (nRtn == -1)
+    {
+        printf("[TCP server]Fail: setsockopt():so_keepidle\n");
+        return -1;
+    }
+
+    nRtn = setsockopt(nSockFd_, SOL_TCP, TCP_KEEPCNT, &nKeepAliveCnt_, sizeof(nKeepAliveCnt_));
+    if (nRtn == -1)
+    {
+        printf("[TCP server]Fail: setsockopt():so_keepcnt\n");
+        return -1;
+    }
+
+    nRtn = setsockopt(nSockFd_, SOL_TCP, TCP_KEEPINTVL, &nKeepAliveInterval_, sizeof(nKeepAliveInterval_));
+    if (nRtn == -1)
+    {
+        printf("[TCP server]Fail: setsockopt():so_keepintvl\n");
+        return -1;
+    }
+    return nRtn;
 }

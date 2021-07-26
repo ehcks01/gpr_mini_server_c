@@ -16,5 +16,6 @@ void socket_write(char code, void *bytes, int size);
 void sendSavePath();
 void socket_read(char buffer[], int buff_size);
 void socket_close();
+int tcpSetKeepAlive(int nSockFd_, int nKeepAlive_, int nKeepAliveIdle_, int nKeepAliveCnt_, int nKeepAliveInterval_);
 
 #endif
