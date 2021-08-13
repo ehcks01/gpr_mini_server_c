@@ -13,6 +13,7 @@
 #include "gpr_socket_acq.h"
 #include "gpr_socket_ana.h"
 #include "wifi_selector.h"
+#include "../encoder/encoder.h"
 #include "../NVA/NVA_CON.h"
 #include "../NVA/NVA_file.h"
 #include "../common/gpr_param.h"
@@ -123,9 +124,8 @@ void socket_read(char buffer[], int buff_size)
             {
             case SERVER_INFO_FNT:
             {
-                //임시로 이렇게 해놈.. 나중엔 진짜 배터리값으로
-                int random = rand() % 100;
-                socket_write(SERVER_INFO_NTF, &random, 1);
+                int battery = getBatteryPercent();
+                socket_write(SERVER_INFO_NTF, &battery, 1);
                 break;
             }
             case HEADER_INFO_FTN:

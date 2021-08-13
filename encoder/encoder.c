@@ -1,6 +1,8 @@
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
 #include <wiringSerial.h>
+#include <wiringPiI2C.h>
+#include <ads1115.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -41,12 +43,22 @@ bool wiringPi_ready()
         printf("wiringPiSetup failed\n");
         return false;
     }
+
+    //배터리 정보를 읽기 위한 i2c 설정.
+    if (ads1115Setup(PINBASE, ADS_ADDR) == -1)
+    {
+        printf("ads1115Setup failed\n");
+        return false;
+    }
+  
+    //novelda 정보를 읽기 위한 spi 설정.
     if (wiringPiSPISetup(SPI_CHANNEL, SPI_SPEED) == -1)
     {
         printf("wiringPiSPISetup failed\n");
         return false;
     }
 
+     //endcoder 정보를 읽기 위한 gpio 설정.
     if (wiringPiISR(PIN1, INT_EDGE_BOTH, &encoder_interrupt) < 0)
     {
         printf("wiringPiISR failed\n");
@@ -59,4 +71,17 @@ bool wiringPi_ready()
 
     printf("wiringPi setup completed..\n");
     return true;
+}
+
+int getBatteryPercent()
+{
+    int analog1 = analogRead(PINBASE + 1);
+    int fullGauge = MAX_BATTERY - MIN_BATTERY;
+    int currentGauge = analog1 - MIN_BATTERY;
+    int currentPercent = 0;
+    if (currentGauge > 0)
+    {
+        currentPercent = currentGauge * 100 / fullGauge;
+    }
+    return currentPercent;
 }
