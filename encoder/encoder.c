@@ -20,17 +20,22 @@ void encoder_interrupt(void)
         return;
     }
     interruptCheck = true;
-
+    
     if (acqCon.runAcq && (is2DScanMode() || isNotFull3DData()))
     {
-        if (digitalRead(PIN1) == digitalRead(PIN2))
+        int pin1_value = digitalRead(PIN1);
+        if (pin1_value == 0)
         {
-            GPR_Capture_raw(0);
-            frontRowData();
-        }
-        else
-        {
-            backRowData();
+            int pin2_value = digitalRead(PIN2);
+            if (pin1_value == pin2_value)
+            {
+                GPR_Capture_raw(0);
+                frontRowData();
+            }
+            else
+            {
+                backRowData();
+            }
         }
     }
     interruptCheck = false;
@@ -50,7 +55,7 @@ bool wiringPi_ready()
         printf("ads1115Setup failed\n");
         return false;
     }
-  
+
     //novelda 정보를 읽기 위한 spi 설정.
     if (wiringPiSPISetup(SPI_CHANNEL, SPI_SPEED) == -1)
     {
@@ -58,7 +63,7 @@ bool wiringPi_ready()
         return false;
     }
 
-     //endcoder 정보를 읽기 위한 gpio 설정.
+    //endcoder 정보를 읽기 위한 gpio 설정.
     if (wiringPiISR(PIN1, INT_EDGE_BOTH, &encoder_interrupt) < 0)
     {
         printf("wiringPiISR failed\n");
