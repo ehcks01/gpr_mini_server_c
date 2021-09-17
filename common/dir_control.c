@@ -12,8 +12,8 @@
 #include "cJSON.h"
 #include "usb_control.h"
 
-char strRealPath[50];     //경로까지
-char strExeName[50]; //실행 파일 이름
+char strRealPath[50]; //경로까지
+char strExeName[50];  //실행 파일 이름
 
 bool initRealPath(char *argv0)
 {
@@ -255,16 +255,29 @@ void getDirList(cJSON *root, char *path, bool repet)
             continue;
         }
 
-        cJSON *file = cJSON_CreateObject();
-        cJSON_AddItemToArray(root, file);
+        bool isDir = true;
         // recursively remove a nested directory
         if (S_ISDIR(stat_entry.st_mode) != 0)
         {
-            cJSON_AddTrueToObject(file, "isDir");
             if (repet)
             {
                 getDirList(root, full_path, repet);
             }
+        }
+        else
+        {
+            if (checkHeaderInfoFromAcqFile(full_path) == false)
+            {
+                free(full_path);
+                continue;
+            }
+            isDir = false;
+        }
+        cJSON *file = cJSON_CreateObject();
+        cJSON_AddItemToArray(root, file);
+        if (isDir)
+        {
+            cJSON_AddTrueToObject(file, "isDir");
         }
         else
         {
@@ -277,6 +290,34 @@ void getDirList(cJSON *root, char *path, bool repet)
         free(full_path);
     }
     closedir(dir);
+}
+
+bool checkHeaderInfoFromAcqFile(char *path)
+{
+    if (strstr(path, ".MGM") == NULL)
+    {
+        return true;
+    }
+    else
+    {
+        int haedrSize = 256;
+        char buf[haedrSize];
+        int fd = open(path, O_RDONLY);
+
+        ssize_t size = read(fd, buf, sizeof buf);
+        if (size == haedrSize)
+        {
+            for (int i = 0; i < haedrSize; i++)
+            {
+                if (buf[i] != 0x00)
+                {
+                    return true;
+                }
+            }
+        }
+        deleteFile(path);
+        return false;
+    }
 }
 
 char *getFileNameFromPath(char *path)

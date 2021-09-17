@@ -11,23 +11,15 @@
 #include "../gpr_socket/gpr_socket_acq.h"
 #include "../NVA/NVA_CON.h"
 
-bool interruptCheck = false;
-
 void encoder_interrupt(void)
 {
-    if (interruptCheck)
-    {
-        return;
-    }
-    interruptCheck = true;
-    
     if (acqCon.runAcq && (is2DScanMode() || isNotFull3DData()))
     {
-        int pin1_value = digitalRead(PIN1);
-        if (pin1_value == 0)
+        int pin2_value = digitalRead(PIN2);
+        if (pin2_value == 1)
         {
-            int pin2_value = digitalRead(PIN2);
-            if (pin1_value == pin2_value)
+            int pin1_value = digitalRead(PIN1);
+            if (pin2_value == pin1_value)
             {
                 GPR_Capture_raw(0);
                 frontRowData();
@@ -38,7 +30,6 @@ void encoder_interrupt(void)
             }
         }
     }
-    interruptCheck = false;
 }
 
 bool wiringPi_ready()
@@ -64,7 +55,7 @@ bool wiringPi_ready()
     }
 
     //endcoder 정보를 읽기 위한 gpio 설정.
-    if (wiringPiISR(PIN1, INT_EDGE_BOTH, &encoder_interrupt) < 0)
+    if (wiringPiISR(PIN2, INT_EDGE_BOTH, &encoder_interrupt) < 0)
     {
         printf("wiringPiISR failed\n");
         return false;
@@ -73,6 +64,7 @@ bool wiringPi_ready()
     pinMode(PIN1, INPUT);
     pinMode(PIN2, INPUT);
     pinMode(LASER_PIN, OUTPUT);
+    pinMode(ENCODER_POWER_PIN, OUTPUT);
 
     printf("wiringPi setup completed..\n");
     return true;

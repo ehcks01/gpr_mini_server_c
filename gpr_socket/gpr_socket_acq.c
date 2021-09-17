@@ -10,6 +10,9 @@
 #include "gpr_socket_protocol.h"
 #include "../common/gpr_param.h"
 #include "../common/dir_control.h"
+#include "../NVA/NVA_CON.h"
+#include "../NVA/NVA6100.h"
+#include "../encoder/encoder.h"
 
 struct AcqContoroller acqCon = {.fp = NULL, .fileName = NULL, .savePath = NULL, .dataCnt = 0, .dataCnt = 0, .grid3D = NULL, .runAcq = false};
 
@@ -201,11 +204,18 @@ void saveAcq(char *headerInfo, int size)
     free(path);
 }
 
-void laserOn()
+void acqOn()
 {
     digitalWrite(LASER_PIN, HIGH);
+    digitalWrite(ENCODER_POWER_PIN, HIGH);
+    NVA_Init(0);
+    if (NVAParam.ChipID != 0x0306)
+    {
+        printf("Novelda initialization failed\n");
+    }
 }
-void laserOff()
+void acqOff()
 {
     digitalWrite(LASER_PIN, LOW);
+    digitalWrite(ENCODER_POWER_PIN, LOW);
 }

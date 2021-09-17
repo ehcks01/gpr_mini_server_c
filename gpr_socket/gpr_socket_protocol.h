@@ -17,7 +17,7 @@ enum SocketProtocol
     //저장 경로 보냄
     ACQ_SAVE_PATH_NTF = 0x07,
     //레이저 on 요청
-    ACQ_LASER_ON_FTN = 0x08,
+    ACQ_ON_FTN = 0x08,
 
     //취득 시작
     ACQ_START_FTN = 0x11,

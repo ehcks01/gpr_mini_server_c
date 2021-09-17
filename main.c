@@ -5,9 +5,7 @@
 #include "common/usb_control.h"
 #include "common/dir_control.h"
 #include "encoder/encoder.h"
-#include "NVA/NVA_CON.h"
 #include "NVA/NVA_file.h"
-#include "NVA/NVA6100.h"
 #include "gpr_socket/gpr_socket.h"
 #include "gpr_socket/gpr_socket_protocol.h"
 
@@ -22,12 +20,6 @@ int main(char *argc, char *argv[])
     if (wiringPi_ready() == false)
     {
         printf("wiringPi initialization failed\n");
-        // return 0;
-    }
-    NVA_Init(0);
-    if (NVAParam.ChipID != 0x0306)
-    {
-        printf("Novelda initialization failed\n");
         // return 0;
     }
 

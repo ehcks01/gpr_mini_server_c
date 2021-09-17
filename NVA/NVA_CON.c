@@ -9,22 +9,10 @@
 
 void NVA_KitConncetCheck(int deviceNumber)
 {
-    SPI_Read(deviceNumber, FORCE_ZERO, 1);
     NVAParam.ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
-    SPI_Read(deviceNumber, FORCE_ZERO, 1);
     SPI_Action(deviceNumber, RESET_SWEEP_CONTROLLER);
 
-    SPI_Read(deviceNumber, FORCE_ZERO, 1);
-    NVAParam.ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
-    NVAParam.CounterBitSelOut = SPI_Read(deviceNumber, COUNTER_BIT_SELECTOR_OUTPUT, 2);
-    NVAParam.SamplingRateMeasResult = SPI_Read(deviceNumber, SAMPLINGRATE_MEASUREMENT_RESULT, 1);
-    NVAParam.SweepControllerStatus = SPI_Read(deviceNumber, SWEEP_CONTROLLER_STATUS, 2);
-    NVAParam.TimingMeasResult = SPI_Read(deviceNumber, TIMING_CALIBRATION_RESULT, 1);
-
     // Open the kit:::ForceZero and Read Chip ID
-    SPI_Read(deviceNumber, FORCE_ZERO, 1);
-    SPI_Read(deviceNumber, FORCE_ONE, 1);
-    NVAParam.ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);
     NVAParam.CounterBitSelOut = SPI_Read(deviceNumber, COUNTER_BIT_SELECTOR_OUTPUT, 2);
     NVAParam.SamplingRateMeasResult = SPI_Read(deviceNumber, SAMPLINGRATE_MEASUREMENT_RESULT, 1);
     NVAParam.SweepControllerStatus = SPI_Read(deviceNumber, SWEEP_CONTROLLER_STATUS, 2);

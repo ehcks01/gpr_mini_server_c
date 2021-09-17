@@ -131,8 +131,8 @@ void socket_read(char buffer[], int buff_size)
             case HEADER_INFO_FTN:
                 setHeaderFromJson(*(tcpData.event_list + i) + 1);
                 break;
-            case ACQ_LASER_ON_FTN:
-                laserOn();
+            case ACQ_ON_FTN:
+                acqOn();
                 break;
             case ACQ_INFO_FTN:
                 setAcqInfoFromJson(*(tcpData.event_list + i) + 1);
@@ -199,8 +199,8 @@ void socket_read(char buffer[], int buff_size)
             case NVA_MODIFY_FTN:
                 setNVASetting(*(tcpData.event_list + i) + 1);
                 saveNVASetting();
-                socket_write(NVA_COMPLETE_NTF, "", 0);
                 NVA_TMVInit(0);
+                socket_write(NVA_COMPLETE_NTF, "", 0);
                 break;
             case ANA_ROOT_DIR_FTN:
                 sendRootDir();
@@ -276,7 +276,7 @@ void socket_read(char buffer[], int buff_size)
 void socket_close()
 {
     stopAcq();
-    laserOff();
+    acqOff();
     // printf("close :%d \n", tcpData.total_length);
 }
 

@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define LASER_PIN 25 //BCM 26
-
 struct AcqContoroller
 {
     FILE *fp;
@@ -32,7 +30,7 @@ void startAcq();
 void frontRowData();
 void backRowData();
 void saveAcq(char *headerInfo, int size);
-void laserOn();
-void laserOff();
+void acqOn();
+void acqOff();
 
 #endif
