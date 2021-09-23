@@ -95,6 +95,9 @@ struct NVAParameter
   int CoarseTuneAdjust;
   int MediumTuneAdjust;
   int FineTuneAdjust;
+
+  float fOffset;
+  float fCurrentMaxValue;
 };
 extern struct NVAParameter NVAParam;
 

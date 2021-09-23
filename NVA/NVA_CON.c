@@ -241,6 +241,9 @@ void NVA_VarInit(int deviceNumber)
     // [0]: MclkDelayedOutsource: 0: Sample signal, 1: SendPulse signal
     // Default: 0x0001
     SPI_Write(deviceNumber, MCLK_OUTPUT_CTRL, 1, 0x0001);
+
+    NVAParam.fOffset = ((NVAParam.DACMin * NVAParam.Iterations * 1) / NVAParam.DACStep);
+    NVAParam.fCurrentMaxValue = (((8192) * NVAParam.Iterations * 1) / NVAParam.DACStep);
 }
 
 void NVA_Init(int deviceNumber)

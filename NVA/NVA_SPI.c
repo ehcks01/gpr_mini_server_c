@@ -2,12 +2,12 @@
 #include <wiringPiSPI.h>
 
 #include "NVA_SPI.h"
+#include "NVA6100.h"
 #include "../encoder/encoder.h"
 #include "../gpr_socket/gpr_socket_acq.h"
 
 void SPI_Transfer(int deviceNumber, unsigned char tx[], int size)
 {
-    usleep(10);
     wiringPiSPIDataRW(SPI_CHANNEL, tx, size);
 }
 
@@ -82,32 +82,35 @@ int SPI_Read(int deviceNumber, unsigned char command, int length)
             }
         }
 
+        //nomarlize 실행
+        for (int i = 0; i < 320; i++)
+        {
+            uiData[i] = (unsigned short)(((((uiData)[i] + NVAParam.fOffset) * 100) / NVAParam.fCurrentMaxValue) * 1000);
+        }
+
+        //튀는 값 제거 실행
+        for (int i = 1; i < 320; i++)
+        {
+            if (uiData[i - 1] > 60000)
+            {
+                uiData[i - 1] = uiData[i];
+            }
+            else
+            {
+                //-30000은 테스트를 하면서 나오는 값을 지정..칩마다 다를 수 있음
+                int diff = uiData[i] - uiData[i - 1];
+                if (diff < -10000)
+                {
+                    uiData[i] = uiData[i - 1];
+                }
+            }
+        }
+
         //little endian임
-        unsigned char last;
-        unsigned char last2;
         for (int i = 0; i < 320; i++)
         {
             acqCon.NVA_readData[i * 2] = uiData[i] & 0xff;
             acqCon.NVA_readData[i * 2 + 1] = (uiData[i] >> 8) & 0xff;
-
-            //byte 11000000 보다 크면
-            if (acqCon.NVA_readData[i * 2 + 1] > 0xc0)
-            {
-                if (i != 0)
-                {
-                    //0이 아니면 앞 값을 덮어씌움.
-                    acqCon.NVA_readData[i * 2] = last;
-                    acqCon.NVA_readData[i * 2 + 1] = last2;
-                }
-                else
-                {   
-                    //0일 경우는 뒤에 값을 덮어씌움. 연속으로 펄스가 튀는 경우는 고려 안함
-                    acqCon.NVA_readData[i * 2] = uiData[i + 1] & 0xff;
-                    acqCon.NVA_readData[i * 2 + 1] = (uiData[i + 1] >> 8) & 0xff;
-                }
-            }
-            last = acqCon.NVA_readData[i * 2];
-            last2 = acqCon.NVA_readData[i * 2 + 1];
         }
     }
     else
