@@ -25,7 +25,7 @@ char *getNVAJson()
     root = cJSON_CreateObject();
 
     cJSON_AddItemToObject(root, "Gain", cJSON_CreateNumber(NVAParam.Gain));
-    cJSON_AddItemToObject(root, "Iterations", cJSON_CreateNumber(NVAParam.Iterations));
+    // cJSON_AddItemToObject(root, "Iterations", cJSON_CreateNumber(NVAParam.Iterations));
     cJSON_AddItemToObject(root, "CoarseTune", cJSON_CreateNumber(NVAParam.CoarseTune));
     cJSON_AddItemToObject(root, "MediumTune", cJSON_CreateNumber(NVAParam.MediumTune));
     cJSON_AddItemToObject(root, "FineTune", cJSON_CreateNumber(NVAParam.FineTune));
@@ -88,7 +88,7 @@ void setNVASetting(char *bytes)
     if (json != NULL)
     {
         NVAParam.Gain = cJSON_GetObjectItem(json, "Gain")->valueint;
-        NVAParam.Iterations = cJSON_GetObjectItem(json, "Iterations")->valueint;
+        // NVAParam.Iterations = cJSON_GetObjectItem(json, "Iterations")->valueint;
         NVAParam.CoarseTune = cJSON_GetObjectItem(json, "CoarseTune")->valueint;
         NVAParam.MediumTune = cJSON_GetObjectItem(json, "MediumTune")->valueint;
         NVAParam.FineTune = cJSON_GetObjectItem(json, "FineTune")->valueint;
