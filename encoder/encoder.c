@@ -30,7 +30,6 @@ void encoder_interrupt(void)
             }
         }
     }
-    usleep(1);
 }
 
 bool wiringPi_ready()
