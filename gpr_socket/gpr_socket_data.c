@@ -70,16 +70,16 @@ void convertEvent(char buffer[], int buffer_size)
             //이벤트를 이벤트 리스트에 추가
             tcpData.event_list_cnt++;
             char **temp_event_list = calloc(tcpData.event_list_cnt, 4);
-            int max_index = (tcpData.event_list_cnt - 1);
-            memcpy(temp_event_list, tcpData.event_list, max_index);
-            *(temp_event_list + max_index) = event;
+            int end_index = (tcpData.event_list_cnt - 1);
+            memcpy(temp_event_list, tcpData.event_list, end_index);
+            *(temp_event_list + end_index) = event;
             free(tcpData.event_list);
             tcpData.event_list = temp_event_list;
 
             //이벤트 리스트에 추가한 이벤트의 사이즈 기록
             int *temp_event_length_list = calloc(tcpData.event_list_cnt, 4);
-            memcpy(temp_event_length_list, tcpData.event_list, max_index);
-            *(temp_event_length_list + max_index) = tcpData.event_length;
+            memcpy(temp_event_length_list, tcpData.event_list, end_index);
+            *(temp_event_length_list + end_index) = tcpData.event_length;
             free(tcpData.event_length_list);
             tcpData.event_length_list = temp_event_length_list;
 

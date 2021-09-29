@@ -6,6 +6,7 @@
 #include "common/dir_control.h"
 #include "encoder/encoder.h"
 #include "NVA/NVA_file.h"
+#include "gpr_socket/gpr_socket_data.h"
 #include "gpr_socket/gpr_socket.h"
 #include "gpr_socket/gpr_socket_protocol.h"
 
@@ -34,6 +35,11 @@ int main(char *argc, char *argv[])
 
         while (1)
         {
+            //tcp data 부분 초기화
+            tcpData.event_length = 0;
+            tcpData.total_length = 0;
+            tcpData.event_list_cnt = 0;
+            
             char buff_rcv[1024];
             int buff_size;
             usleep(1);
