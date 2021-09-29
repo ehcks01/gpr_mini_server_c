@@ -82,33 +82,26 @@ int SPI_Read(int deviceNumber, unsigned char command, int length)
             }
         }
 
-        //nomarlize 실행
+        //튀는 값 제거(iteration 50에 맞춘거라 다를땐 값 조정 필요.)
+        //보통 차이값이 10000 이상 나오는데 5000으로 설정해둠
+        int diff = uiData[0] - uiData[1];
+        if (diff > 5000 || diff < -5000)
+        {
+            uiData[0] = uiData[1];
+        }
+        for (int i = 2; i < 320; i++)
+        {
+            diff = uiData[i] - uiData[i - 1];
+            if(diff > 5000 || diff < -5000) {
+                uiData[i] = uiData[i - 1];
+            }
+        }
+        
         for (int i = 0; i < 320; i++)
         {
+            //nomarlize 실행(nomarlize 후 튀는 값 제거를 하면 각 iteration에 대응이 가능 하겠지만.. 그렇게하니 튀는 값이 안 잡혀서 구현 못 함)
             uiData[i] = (unsigned short)(((((uiData)[i] + NVAParam.fOffset) * 100) / NVAParam.fCurrentMaxValue) * 1000);
-        }
-
-        //튀는 값 제거 실행
-        for (int i = 1; i < 320; i++)
-        {
-            if (uiData[i - 1] > 60000)
-            {
-                uiData[i - 1] = uiData[i];
-            }
-            else
-            {
-                //-30000은 테스트를 하면서 나오는 값을 지정..칩마다 다를 수 있음
-                int diff = uiData[i] - uiData[i - 1];
-                if (diff < -10000)
-                {
-                    uiData[i] = uiData[i - 1];
-                }
-            }
-        }
-
-        //little endian임
-        for (int i = 0; i < 320; i++)
-        {
+            //little endian임
             acqCon.NVA_readData[i * 2] = uiData[i] & 0xff;
             acqCon.NVA_readData[i * 2 + 1] = (uiData[i] >> 8) & 0xff;
         }
