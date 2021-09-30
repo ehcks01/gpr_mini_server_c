@@ -83,24 +83,26 @@ int SPI_Read(int deviceNumber, unsigned char command, int length)
         }
 
         //튀는 값 제거(iteration 50에 맞춘거라 다를땐 값 조정 필요.)
-        //보통 차이값이 10000 이상 나오는데 5000으로 설정해둠
-        int diff = uiData[0] - uiData[1];
-        if (diff > 5000 || diff < -5000)
+        if (uiData[0] > 50000)
         {
             uiData[0] = uiData[1];
         }
-        for (int i = 2; i < 320; i++)
+        for (int i = 2; i < 319; i++)
         {
-            diff = uiData[i] - uiData[i - 1];
-            if(diff > 5000 || diff < -5000) {
-                uiData[i] = uiData[i - 1];
+            if (uiData[i] > 50000)
+            {
+                uiData[i] = (uiData[i - 1] + uiData[i + 1]) / 2;
             }
         }
-        
+        if (uiData[319] > 50000)
+        {
+            uiData[319] = uiData[318];
+        }
+
         for (int i = 0; i < 320; i++)
         {
             //nomarlize 실행(nomarlize 후 튀는 값 제거를 하면 각 iteration에 대응이 가능 하겠지만.. 그렇게하니 튀는 값이 안 잡혀서 구현 못 함)
-            uiData[i] = (unsigned short)(((((uiData)[i] + NVAParam.fOffset) * 100) / NVAParam.fCurrentMaxValue) * 1000);
+            // uiData[i] = (unsigned short)(((((uiData)[i] + NVAParam.fOffset) * 100) / NVAParam.fCurrentMaxValue) * 1000);
             //little endian임
             acqCon.NVA_readData[i * 2] = uiData[i] & 0xff;
             acqCon.NVA_readData[i * 2 + 1] = (uiData[i] >> 8) & 0xff;
