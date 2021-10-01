@@ -83,18 +83,18 @@ int SPI_Read(int deviceNumber, unsigned char command, int length)
         }
 
         //튀는 값 제거(iteration 50에 맞춘거라 다를땐 값 조정 필요.)
-        if (uiData[0] > 50000)
+        if (uiData[0] > 49000 || uiData[0] < 0)
         {
             uiData[0] = uiData[1];
         }
         for (int i = 2; i < 319; i++)
         {
-            if (uiData[i] > 50000)
+            if (uiData[i] > 49000 || uiData[i] < 0)
             {
                 uiData[i] = (uiData[i - 1] + uiData[i + 1]) / 2;
             }
         }
-        if (uiData[319] > 50000)
+        if (uiData[319] > 49000 || uiData[319] < 0)
         {
             uiData[319] = uiData[318];
         }
