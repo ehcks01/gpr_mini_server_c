@@ -19,7 +19,7 @@ void encoder_interrupt(void)
         if (pin2_value == 1)
         {
             int pin1_value = digitalRead(PIN1);
-            if (pin2_value == pin1_value)
+            if ((pin2_value == pin1_value && acqCon.bForwardScan) || (pin2_value != pin1_value && !acqCon.bForwardScan))
             {
                 GPR_Capture_raw(0);
                 frontRowData();

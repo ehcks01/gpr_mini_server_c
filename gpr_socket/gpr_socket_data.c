@@ -225,6 +225,9 @@ void setAcqInfoFromJson(char *bytes)
         memcpy(acqCon.savePath, str, strlen(str));
         printf("acqCon.savePath: %s\n", acqCon.savePath);
 
+        acqCon.bForwardScan = cJSON_GetObjectItem(json, "scanDirection")->valueint;
+        printf("scanDirection: %d\n", acqCon.bForwardScan);
+
         if (headerParameter.cScanMode != 0)
         {
             acqCon.dataSize3D = cJSON_GetObjectItem(json, "dataSize3D")->valueint;
