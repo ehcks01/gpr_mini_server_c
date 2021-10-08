@@ -29,6 +29,7 @@ SET ( SRC_FILES
         gpr_socket/gpr_socket_ana.c
         gpr_socket/gpr_socket.c
         gpr_socket/gpr_socket_data.c
+        gpr_socket/wifi_selector.c
         main.c
         )
  

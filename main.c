@@ -9,19 +9,22 @@
 #include "gpr_socket/gpr_socket_data.h"
 #include "gpr_socket/gpr_socket.h"
 #include "gpr_socket/gpr_socket_protocol.h"
+#include "gpr_socket/wifi_selector.h"
 
 int main(char *argc, char *argv[])
 {
+    if(checkHostFile() == false) {
+        printf("hostFile initialization\n");
+    }
+
     if ((initRealPath(argv[0]) && initUsbMountPath() && initNVAPath()) == false)
     {
         printf("Path initialization failed");
-        // return 0;
     };
     loadNVASetting();
     if (wiringPi_ready() == false)
     {
         printf("wiringPi initialization failed\n");
-        // return 0;
     }
 
     while (1)
