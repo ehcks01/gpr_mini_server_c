@@ -30,7 +30,7 @@ void stopAcq();
 void startAcq();
 void frontRowData();
 void backRowData();
-void saveAcq(char *headerInfo, int size);
+bool saveAcq(char *headerInfo, int size);
 void acqOn();
 void acqOff();
 

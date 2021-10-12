@@ -164,29 +164,36 @@ void frontRowData()
     double start_ms = (double)time.tv_sec * 1000000 + (double)time.tv_usec;
     memcpy(acqCon.NVA_readData + fixDepthDataSize, &start_ms, sizeof(start_ms));
 
-    acqCon.dataCnt++;
-    fwrite(acqCon.NVA_readData, 1, fixDepthDataSize, acqCon.fp);
-    socket_write(ACQ_DATA_NTF, acqCon.NVA_readData, sizeof(acqCon.NVA_readData));
+    if (acqCon.fp != NULL)
+    {
+        acqCon.dataCnt++;
+        fwrite(acqCon.NVA_readData, 1, fixDepthDataSize, acqCon.fp);
+        socket_write(ACQ_DATA_NTF, acqCon.NVA_readData, sizeof(acqCon.NVA_readData));
+    }
 }
 
 void backRowData()
 {
-    long size = ftell(acqCon.fp);
-    if (size > fixHeaderSize)
+    if (acqCon.fp != NULL)
     {
-        fseek(acqCon.fp, -fixDepthDataSize, SEEK_CUR);
-        socket_write(ACQ_BACK_DATA_NTF, "", 0);
-
-        acqCon.dataCnt--;
-        if (acqCon.dataCnt < 0)
+        long size = ftell(acqCon.fp);
+        if (size > fixHeaderSize)
         {
-            acqCon.dataCnt = 0;
+            fseek(acqCon.fp, -fixDepthDataSize, SEEK_CUR);
+            socket_write(ACQ_BACK_DATA_NTF, "", 0);
+
+            acqCon.dataCnt--;
+            if (acqCon.dataCnt < 0)
+            {
+                acqCon.dataCnt = 0;
+            }
         }
     }
 }
 
-void saveAcq(char *headerInfo, int size)
+bool saveAcq(char *headerInfo, int size)
 {
+    bool saveState = false;
     char *path = getFullPath(acqCon.savePath, acqCon.fileName);
     FILE *fp = fopen(path, "r+");
     if (fp != NULL)
@@ -195,6 +202,7 @@ void saveAcq(char *headerInfo, int size)
         //앞에 1바이트는 socket code라서 제외 시킴
         fwrite(headerInfo, 1, size - 1, fp);
         fclose(fp);
+        saveState = true;
         printf("file save successed: %s \n", path);
     }
     else
@@ -202,6 +210,7 @@ void saveAcq(char *headerInfo, int size)
         printf("file save failed: %s \n", path);
     }
     free(path);
+    return saveState;
 }
 
 void acqOn()

@@ -153,11 +153,18 @@ void socket_read(char buffer[], int buff_size)
                 break;
             case ACQ_NON_SAVE_FTN:
                 deleteAcqFile();
-                usleep(1);
                 break;
             case ACQ_SAVE_FTN:
-                saveAcq(*(tcpData.event_list + i) + 1, tcpData.event_length_list[i]);
-                socket_write(ACQ_SAVE_NTF, "", 0);
+            {
+                bool saveState = saveAcq(*(tcpData.event_list + i) + 1, tcpData.event_length_list[i]);
+                if (saveState)
+                {
+                    socket_write(ACQ_SAVE_NTF, "", 0);
+                }
+                else
+                {
+                    socket_write(ACQ_SAVE_FAILED_NTF, "", 0);
+                }
 
                 // 2d일땐 다음 파일 준비
                 if (headerParameter.cScanMode == 0)
@@ -165,8 +172,8 @@ void socket_read(char buffer[], int buff_size)
                     makeSavePath();
                     sendSavePath();
                 }
-                usleep(1);
                 break;
+            }
             case ACQ_REFRESH_FTN:
                 endFileWrite();
                 deleteAcqFile();
