@@ -166,9 +166,11 @@ void frontRowData()
 
     if (acqCon.fp != NULL)
     {
-        acqCon.dataCnt++;
-        fwrite(acqCon.NVA_readData, 1, fixDepthDataSize, acqCon.fp);
-        socket_write(ACQ_DATA_NTF, acqCon.NVA_readData, sizeof(acqCon.NVA_readData));
+        if (fwrite(acqCon.NVA_readData, 1, fixDepthDataSize, acqCon.fp) == fixDepthDataSize)
+        {
+            acqCon.dataCnt++;
+            socket_write(ACQ_DATA_NTF, acqCon.NVA_readData, sizeof(acqCon.NVA_readData));
+        }
     }
 }
 
