@@ -72,13 +72,30 @@ bool wiringPi_ready()
 
 int getBatteryPercent()
 {
+    //배터리 전압값 읽기
     int analog1 = analogRead(PINBASE + 1);
+    //배터리 총 용량
     int fullGauge = MAX_BATTERY - MIN_BATTERY;
+    //읽은 전압값의 배터리 용량
     int currentGauge = analog1 - MIN_BATTERY;
+    //배터리가 빨리 닳는 구간의 총용량
+    int fastConsuomeGauage = (int)((fullGauge * LOW_RATE_BATTERY) / 100);
+    //배터리가 빨리 닳는 구간의 총비율(2배 빨리 닳는다고 보고 원래의 비중에서 2배 줄임)
+    int fastConsuomRate = (int)(LOW_RATE_BATTERY / 2);
+    //읽은 전압값의 일반적인 소모 구간에서의 용량
+    int normalGauage = currentGauge - fastConsuomeGauage;
+
+    //30%아래는 비중을 절반으로 떨어드려 15%만 차지하게 할려고함.. 수학적으로 간단하게 가능하면 정리되면 좋을듯 ㅠ
     int currentPercent = 0;
-    if (currentGauge > 0)
+    if (normalGauage > 0)
     {
-        currentPercent = currentGauge * 100 / fullGauge;
+        int normalConsuomeRate = 100 - fastConsuomRate;
+        int normalConsuomeGauage = fullGauge - fastConsuomeGauage;
+        currentPercent = (int)(normalGauage * normalConsuomeRate / normalConsuomeGauage + fastConsuomRate);
+    }
+    else if (currentGauge > 0)
+    {
+        currentPercent = currentGauge * fastConsuomRate / fastConsuomeGauage;
     }
     return currentPercent;
 }
