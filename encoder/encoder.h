@@ -24,6 +24,10 @@
 //gpio 설정 laser
 #define LASER_PIN 25 //BCM 26
 
+//led 설정
+#define SERVER_ON_PIN 29 //green color
+#define CLIENT_ACCESS_PIN 28 //blue color
+
 void encoder_interrupt(void);
 bool wiringPi_ready();
 int getBatteryPercent();

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <wiringPi.h>
 
 #include "common/usb_control.h"
 #include "common/dir_control.h"
@@ -34,6 +35,7 @@ int main(char *argc, char *argv[])
             printf("Socket initialization failed\n");
             break;
         }
+        digitalWrite(SERVER_ON_PIN, HIGH);
         server_restart = false;
 
         while (1)
@@ -50,6 +52,7 @@ int main(char *argc, char *argv[])
             {
                 continue;
             }
+            digitalWrite(CLIENT_ACCESS_PIN, HIGH);
             socket_write(CONNECTION_NTF, "", 0);
             while ((buff_size = socket_receive(buff_rcv)) > 0)
             {
@@ -57,13 +60,14 @@ int main(char *argc, char *argv[])
             }
             socket_close();
             socket_client_done();
-
+            digitalWrite(CLIENT_ACCESS_PIN, LOW);
             if (server_restart)
             {
                 break;
             }
         }
         socket_server_done();
+        digitalWrite(SERVER_ON_PIN, LOW);
         pclose(popen("sudo service hostapd restart", "r"));
         sleep(2);
     }

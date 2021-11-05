@@ -65,6 +65,8 @@ bool wiringPi_ready()
     pinMode(PIN2, INPUT);
     pinMode(LASER_PIN, OUTPUT);
     pinMode(ENCODER_POWER_PIN, OUTPUT);
+    pinMode(SERVER_ON_PIN, OUTPUT);
+    pinMode(CLIENT_ACCESS_PIN, OUTPUT);
 
     printf("wiringPi setup completed..\n");
     return true;
