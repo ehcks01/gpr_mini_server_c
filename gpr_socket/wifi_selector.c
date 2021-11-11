@@ -222,6 +222,7 @@ bool checkHostFile()
                 fprintf(file, hostLines[i]);
             }
             fclose(file);
+            chekLines = true;
             pclose(popen("sudo service hostapd restart", "r"));
         }
     }

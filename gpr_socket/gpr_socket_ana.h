@@ -10,9 +10,6 @@ struct ThreadSendFileInfo
     FILE *filePtr;
 };
 
-pthread_t fileThread;
-pthread_t usbThread;
-
 void sendRootDir();
 void sendDiskSize();
 void sendReadDir(char *path, char protocol, bool repeat);

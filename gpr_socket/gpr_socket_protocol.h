@@ -1,7 +1,7 @@
 #ifndef gpr_socket_param__h
 #define gpr_socket_param__h
 
-enum SocketProtocol
+extern enum SocketProtocol
 {
     //최초 연결
     CONNECTION_NTF = 0x01,

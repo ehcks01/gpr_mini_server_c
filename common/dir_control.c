@@ -12,8 +12,8 @@
 #include "cJSON.h"
 #include "usb_control.h"
 
-char strRealPath[50]; //경로까지
-char strExeName[50];  //실행 파일 이름
+char strRealPath[100]; //경로까지
+char strExeName[100];  //실행 파일 이름
 
 bool initRealPath(char *argv0)
 {
@@ -25,7 +25,7 @@ bool initRealPath(char *argv0)
     }
     else
     {
-        char copyStr[50];
+        char copyStr[100];
         strcpy(copyStr, res);
         char *ptr = strtok(res, "/");
         char *lastPtr = ptr;

@@ -8,7 +8,7 @@
 #include "NVA6100.h"
 #include "NVA_file.h"
 
-char strNVAPath[50];
+char strNVAPath[100];
 
 bool initNVAPath()
 {

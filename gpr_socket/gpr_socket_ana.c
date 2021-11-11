@@ -15,6 +15,9 @@
 #include "../common/gpr_param.h"
 #include "../common/usb_control.h"
 
+pthread_t fileThread;
+pthread_t usbThread;
+
 void sendRootDir()
 {
     int pathLen = strlen(strRealPath) + strlen(fixDataRootName) + 1;
