@@ -11,22 +11,33 @@
 #include "../gpr_socket/gpr_socket_acq.h"
 #include "../NVA/NVA_CON.h"
 
+int half_resolution = 0;
 void encoder_interrupt(void)
 {
     if (acqCon.runAcq && (is2DScanMode() || isNotFull3DData()))
     {
+        //1, 0 값을 다 읽으면 분해능이 200이 나오므로 1일때만 읽음
         int pin2_value = digitalRead(PIN2);
         if (pin2_value == 1)
         {
-            int pin1_value = digitalRead(PIN1);
-            if ((pin2_value == pin1_value && acqCon.bForwardScan) || (pin2_value != pin1_value && !acqCon.bForwardScan))
+            //100분해능에서 절반만 사용
+            if (half_resolution == 0)
             {
-                GPR_Capture_raw(0);
-                frontRowData();
+                half_resolution = 1;
             }
             else
             {
-                backRowData();
+                half_resolution = 0;
+                int pin1_value = digitalRead(PIN1);
+                if ((pin2_value == pin1_value && acqCon.bForwardScan) || (pin2_value != pin1_value && !acqCon.bForwardScan))
+                {
+                    GPR_Capture_raw(0);
+                    frontRowData();
+                }
+                else
+                {
+                    backRowData();
+                }
             }
         }
     }
