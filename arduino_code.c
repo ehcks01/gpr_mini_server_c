@@ -2,14 +2,14 @@
 #include <FastLED.h>
 #include <MsTimer2.h>
 
-#define SWITCH_RED_LED 7
-#define SWITCH_BLUE_LED 8
-#define SWITCH_GREEN_LED 9
 #define LED_BAR_PIN 2
+#define SWITCH_RED_LED 3
+#define SWITCH_BLUE_LED 4
+#define SWITCH_GREEN_LED 5
 #define NUM_LEDS 5
-CRGB leds[NUM_LEDS];
 
-SoftwareSerial raspi_serial(10, 11); // 2:RX 3:TX
+CRGB leds[NUM_LEDS];
+SoftwareSerial raspi_serial(6, 7); // 2:RX 3:TX
 int bootWaitCnt = 0;
 
 void setup()
@@ -23,12 +23,12 @@ void setup()
     raspi_serial.begin(57600);
 
     FastLED.addLeds<WS2812, LED_BAR_PIN, GRB>(leds, NUM_LEDS);
-    FastLED.setBrightness(10);
+    FastLED.setBrightness(5);
     leds[0] = CRGB(0, 0, 255);
     FastLED.show();
 
     //대기 시간이 길거나 짧으면 여기 수정
-    MsTimer2::set(3900, bootWaitFunc);
+    MsTimer2::set(2800, bootWaitFunc);
     MsTimer2::start();
 }
 
