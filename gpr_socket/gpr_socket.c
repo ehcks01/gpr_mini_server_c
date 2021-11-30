@@ -124,8 +124,7 @@ void socket_read(char buffer[], int buff_size)
             {
             case SERVER_INFO_FNT:
             {
-                int battery = getBatteryPercent();
-                socket_write(SERVER_INFO_NTF, &battery, 1);
+                socket_write(SERVER_INFO_NTF, &battery_gauge, 1);
                 break;
             }
             case HEADER_INFO_FTN:

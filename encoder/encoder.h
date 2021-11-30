@@ -17,19 +17,24 @@
 #define SPI_SPEED 8000000
 
 //gpio 설정 encoder
-#define PIN1 21 //BCM 5
-#define PIN2 22 //BMC 6
+#define ENCODER_PIN1 21 //BCM 5
+#define ENCODER_PIN2 22 //BMC 6
 #define ENCODER_POWER_PIN 26 //BCM 12
 
 //gpio 설정 laser
 #define LASER_PIN 25 //BCM 26
 
-//led 설정
-#define SERVER_ON_PIN 29 //green color
-#define CLIENT_ACCESS_PIN 28 //blue color
+extern int battery_gauge;
 
 void encoder_interrupt(void);
 bool wiringPi_ready();
-int getBatteryPercent();
+void readBatterGauge();
+void threadBattery();
+void *setBatteryGauge(void *arg);
+
+void switchServerON();
+void switchServerOFF();
+void switchClientON();
+void switchClientOFF();
 
 #endif

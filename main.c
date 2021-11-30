@@ -35,7 +35,7 @@ int main(char *argc, char *argv[])
             printf("Socket initialization failed\n");
             break;
         }
-        digitalWrite(SERVER_ON_PIN, HIGH);
+        switchServerON();
         server_restart = false;
 
         while (1)
@@ -52,7 +52,7 @@ int main(char *argc, char *argv[])
             {
                 continue;
             }
-            digitalWrite(CLIENT_ACCESS_PIN, HIGH);
+            switchClientON();
             socket_write(CONNECTION_NTF, "", 0);
             while ((buff_size = socket_receive(buff_rcv)) > 0)
             {
@@ -60,14 +60,14 @@ int main(char *argc, char *argv[])
             }
             socket_close();
             socket_client_done();
-            digitalWrite(CLIENT_ACCESS_PIN, LOW);
+            switchClientOFF();
             if (server_restart)
             {
                 break;
             }
         }
         socket_server_done();
-        digitalWrite(SERVER_ON_PIN, LOW);
+        switchServerOFF();
         pclose(popen("sudo service hostapd restart", "r"));
         sleep(2);
     }
