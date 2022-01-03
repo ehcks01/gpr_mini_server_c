@@ -18,10 +18,7 @@ void setup()
     pinMode(SWITCH_BLUE_LED, OUTPUT);
     pinMode(SWITCH_GREEN_LED, OUTPUT);
     digitalWrite(SWITCH_RED_LED, HIGH);
-
-    Serial.begin(115200);
     raspi_serial.begin(57600);
-
     FastLED.addLeds<WS2812, LED_BAR_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(5);
     leds[0] = CRGB(0, 0, 255);
