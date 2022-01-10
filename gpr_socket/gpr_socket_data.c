@@ -37,15 +37,17 @@ void convertEvent(char buffer[], int buffer_size)
     free(tcpData.total_buffer);
     tcpData.total_buffer = tempBuffer;
     tcpData.total_length += buffer_size;
-    while ((tcpData.event_length == 0 && tcpData.total_length > 4) || (tcpData.event_length != 0 && tcpData.event_length <= tcpData.total_length))
+    int intSize = sizeof(int);
+    while ((tcpData.event_length == 0 && tcpData.total_length > intSize) ||
+           (tcpData.event_length != 0 && tcpData.event_length <= tcpData.total_length))
     {
         //버퍼가 최소 이벤트 사이즈 5보다 크면 사이즈를 알아냄
-        if (tcpData.event_length == 0 && tcpData.total_length > 4)
+        if (tcpData.event_length == 0 && tcpData.total_length > intSize)
         {
-            tcpData.total_length -= 4;
+            tcpData.total_length -= intSize;
             tempBuffer = (char *)calloc(tcpData.total_length, 1);
-            tcpData.event_length = bytesToInt(tcpData.total_buffer, 4);
-            memcpy(tempBuffer, tcpData.total_buffer + 4, tcpData.total_length);
+            tcpData.event_length = bytesToInt(tcpData.total_buffer, intSize);
+            memcpy(tempBuffer, tcpData.total_buffer + intSize, tcpData.total_length);
             free(tcpData.total_buffer);
             tcpData.total_buffer = tempBuffer;
         }
@@ -69,16 +71,16 @@ void convertEvent(char buffer[], int buffer_size)
 
             //이벤트를 이벤트 리스트에 추가
             tcpData.event_list_cnt++;
-            char **temp_event_list = calloc(tcpData.event_list_cnt, 4);
+            char **temp_event_list = calloc(tcpData.event_list_cnt, intSize);
             int end_index = (tcpData.event_list_cnt - 1);
-            memcpy(temp_event_list, tcpData.event_list, end_index);
+            memcpy(temp_event_list, tcpData.event_list, end_index * intSize);
             *(temp_event_list + end_index) = event;
             free(tcpData.event_list);
             tcpData.event_list = temp_event_list;
 
             //이벤트 리스트에 추가한 이벤트의 사이즈 기록
-            int *temp_event_length_list = calloc(tcpData.event_list_cnt, 4);
-            memcpy(temp_event_length_list, tcpData.event_list, end_index);
+            int *temp_event_length_list = calloc(tcpData.event_list_cnt, intSize);
+            memcpy(temp_event_length_list, tcpData.event_list, end_index * intSize);
             *(temp_event_length_list + end_index) = tcpData.event_length;
             free(tcpData.event_length_list);
             tcpData.event_length_list = temp_event_length_list;
