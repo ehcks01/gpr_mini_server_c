@@ -19,6 +19,7 @@
 #include "../common/gpr_param.h"
 #include "../common/dir_control.h"
 #include "../common/usb_control.h"
+#include "../common/log.h"
 
 int server_socket, client_socket;
 bool server_restart = false;
@@ -124,16 +125,20 @@ void socket_read(char buffer[], int buff_size)
             {
             case SERVER_INFO_FNT:
             {
+                log_info("%s", "SERVER_INFO_FNT");
                 socket_write(SERVER_INFO_NTF, &battery_gauge, 1);
                 break;
             }
             case HEADER_INFO_FTN:
+                log_info("%s", "HEADER_INFO_FTN");
                 setHeaderFromJson(*(tcpData.event_list + i) + 1);
                 break;
             case ACQ_ON_FTN:
+                log_info("%s", "ACQ_ON_FTN");
                 acqOn();
                 break;
             case ACQ_INFO_FTN:
+                log_info("%s", "ACQ_INFO_FTN");
                 setAcqInfoFromJson(*(tcpData.event_list + i) + 1);
 
                 if (strlen(acqCon.savePath) == 0)
@@ -143,18 +148,22 @@ void socket_read(char buffer[], int buff_size)
                 sendSavePath();
                 break;
             case ACQ_START_FTN:
+                log_info("%s", "ACQ_START_FTN");
                 startAcq();
                 socket_write(ACQ_START_NTF, "", 0);
                 break;
             case ACQ_STOP_FTN:
+                log_info("%s", "ACQ_STOP_FTN");
                 stopAcq();
                 socket_write(ACQ_STOP_NTF, "", 0);
                 break;
             case ACQ_NON_SAVE_FTN:
+                log_info("%s", "ACQ_NON_SAVE_FTN");
                 deleteAcqFile();
                 break;
             case ACQ_SAVE_FTN:
             {
+                log_info("%s", "ACQ_SAVE_FTN");
                 bool saveState = saveAcq(*(tcpData.event_list + i) + 1, tcpData.event_length_list[i]);
                 if (saveState)
                 {
@@ -174,6 +183,7 @@ void socket_read(char buffer[], int buff_size)
                 break;
             }
             case ACQ_REFRESH_FTN:
+                log_info("%s", "ACQ_REFRESH_FTN");
                 endFileWrite();
                 deleteAcqFile();
 
@@ -185,6 +195,7 @@ void socket_read(char buffer[], int buff_size)
                 }
                 break;
             case ACQ_ABNORMAL_QUIT:
+                log_info("%s", "ACQ_ABNORMAL_QUIT");
                 stopAcq();
                 if (is2DScanMode())
                 {
@@ -197,74 +208,94 @@ void socket_read(char buffer[], int buff_size)
                 break;
             case NVA_REQUEST_FTN:
             {
+                log_info("%s", "NVA_REQUEST_FTN");
                 char *json = getNVAJson();
                 socket_write(NVA_RESPONSE_NTF, json, strlen(json));
                 free(json);
                 break;
             }
             case NVA_MODIFY_FTN:
+                log_info("%s", "NVA_MODIFY_FTN");
                 setNVASetting(*(tcpData.event_list + i) + 1);
                 saveNVASetting();
                 NVA_TMVInit(0);
                 socket_write(NVA_COMPLETE_NTF, "", 0);
                 break;
             case ANA_ROOT_DIR_FTN:
+                log_info("%s", "ANA_ROOT_DIR_FTN");
                 sendRootDir();
                 break;
             case ANA_DISK_SIZE_FTN:
+                log_info("%s", "ANA_DISK_SIZE_FTN");
                 sendDiskSize();
                 break;
             case ANA_READ_DIR_FTN:
+                log_info("%s", "ANA_READ_DIR_FTN");
                 sendReadDir(*(tcpData.event_list + i) + 1, ANA_READ_DIR_NTF, false);
                 break;
             case ANA_CHECK_DIR_FTN:
+                log_info("%s", "ANA_CHECK_DIR_FTN");
                 sendReadDir(*(tcpData.event_list + i) + 1, ANA_CHECK_DIR_NTF, true);
                 break;
             case ANA_UNCHECK_DIR_FTN:
+                log_info("%s", "ANA_UNCHECK_DIR_FTN");
                 sendReadDir(*(tcpData.event_list + i) + 1, ANA_UNCHECK_DIR_NTF, true);
                 break;
             case ANA_DELETE_FILE_FTN:
+                log_info("%s", "ANA_DELETE_FILE_FTN");
                 sendDeleteFile(*(tcpData.event_list + i) + 1);
                 break;
             case ANA_DELETE_FOLDER_FTN:
+                log_info("%s", "ANA_DELETE_FOLDER_FTN");
                 sendDeleteFolder(*(tcpData.event_list + i) + 1);
                 break;
             case ANA_USB_INFO_FTN:
+                log_info("%s", "ANA_USB_INFO_FTN");
                 sendUsbInFo();
                 break;
             case ANA_USB_COPY_FTN:
+                log_info("%s", "ANA_USB_COPY_FTN");
                 socket_write(ANA_USB_COPY_NTF, "", 0);
                 threadUsbCopy(*(tcpData.event_list + i) + 1);
                 break;
             case ANA_USB_COPY_CANCEL_FTN:
+                log_info("%s", "ANA_USB_COPY_CANCEL_FTN");
                 threadUsbCopyCancel();
                 break;
             case ANA_LOAD_FILE_FTN:
+                log_info("%s", "ANA_LOAD_FILE_FTN");
                 threadSendFileData(*(tcpData.event_list + i) + 1, ANA_LOAD_FILE_NTF);
                 break;
             case ANA_LOAD_FILE_CANCEL_FTN:
+                log_info("%s", "ANA_LOAD_FILE_CANCEL_FTN");
                 threadSendFileCancel();
                 break;
             case ANA_LOAD_FILE_WITH_CONFIG_FTN:
+                log_info("%s", "ANA_LOAD_FILE_WITH_CONFIG_FTN");
                 threadSendFileData(*(tcpData.event_list + i) + 1, ANA_LOAD_FILE_WITH_CONFIG_NTF);
                 break;
             case ANA_LOAD_CONFIG_FILE_FTN:
+                log_info("%s", "ANA_LOAD_CONFIG_FILE_FTN");
                 sendLoadConfiFile(*(tcpData.event_list + i) + 1);
                 break;
             case ANA_SAVE_CONFIG_FILE_FTN:
+                log_info("%s", "ANA_SAVE_CONFIG_FILE_FTN");
                 sendSaveConfigFile(*(tcpData.event_list + i) + 1);
                 break;
             case ANA_LOAD_TOP_VIEW_FNT:
+                log_info("%s", "ANA_LOAD_TOP_VIEW_FNT");
                 threadSendFileData(*(tcpData.event_list + i) + 1, ANA_LOAD_TOP_VIEW_NTF);
                 break;
             case WIFI_CHANNEL_LIST_FTN:
             {
+                log_info("%s", "WIFI_CHANNEL_LIST_FTN");
                 char *out = getWifiInfoList();
                 socket_write(WIFI_CHANNEL_LIST_NTF, out, strlen(out));
                 free(out);
                 break;
             }
             case WIFI_CHANNEL_CHANGE_FTN:
+                log_info("%s", "WIFI_CHANNEL_CHANGE_FTN");
                 changeWifiChannel(*(tcpData.event_list + i) + 1);
                 server_restart = true;
                 socket_write(SOCKET_CLOSE_NTF, "", 0);
@@ -272,7 +303,7 @@ void socket_read(char buffer[], int buff_size)
             default:
                 break;
             }
-
+            log_info("%d DONE", tcpData.event_list[i][0]);
             free(*(tcpData.event_list + i));
         }
         tcpData.event_list_cnt = 0;

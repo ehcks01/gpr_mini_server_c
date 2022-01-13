@@ -19,6 +19,7 @@ SET ( SRC_FILES
         common/gpr_param.c
         common/dir_control.c
         common/usb_control.c
+        common/log.c
         encoder/encoder.c
         NVA/NVA_SPI.c
         NVA/NVA_CON.c
