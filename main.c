@@ -25,6 +25,7 @@ int main(char *argc, char *argv[])
         printf("Path initialization failed");
     };
     //log기록
+    log_set_quiet(true);
     FILE *fp_log = info_log_add_fp();
     loadNVASetting();
 
