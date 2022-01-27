@@ -2,14 +2,14 @@
 #include <FastLED.h>
 #include <MsTimer2.h>
 
-#define LED_BAR_PIN 2
-#define SWITCH_RED_LED 3
-#define SWITCH_BLUE_LED 4
-#define SWITCH_GREEN_LED 5
+#define LED_BAR_PIN 7
+#define SWITCH_RED_LED 4
+#define SWITCH_BLUE_LED 3
+#define SWITCH_GREEN_LED 2
 #define NUM_LEDS 5
 
 CRGB leds[NUM_LEDS];
-SoftwareSerial raspi_serial(6, 7); // 2:RX 3:TX
+SoftwareSerial raspi_serial(5, 6); // 2:RX 3:TX
 int bootWaitCnt = 0;
 
 void setup()
@@ -114,9 +114,17 @@ void batteryState(int batteryGauge)
     {
         batteryUpdate(3);
     }
-    else
+    else if (batteryGauge > 0)
     {
         batteryUpdate(4);
+    }
+    else
+    {
+        leds[0] = CRGB(255, 0, 0);
+        for (int i = 1; i < NUM_LEDS; i++)
+        {
+            leds[i] = CRGB(0, 0, 0);
+        }
     }
     FastLED.show();
 }
@@ -127,7 +135,6 @@ void batteryUpdate(int offCnt)
     {
         leds[i] = CRGB(0, 255, 0);
     }
-
     for (int i = NUM_LEDS - offCnt; i < NUM_LEDS; i++)
     {
         leds[i] = CRGB(0, 0, 0);
