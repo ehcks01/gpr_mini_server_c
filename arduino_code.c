@@ -3,8 +3,8 @@
 #include <MsTimer2.h>
 
 #define LED_BAR_PIN 7
-#define SWITCH_RED_LED 4
-#define SWITCH_BLUE_LED 3
+#define SWITCH_RED_LED 3
+#define SWITCH_BLUE_LED 4
 #define SWITCH_GREEN_LED 2
 #define NUM_LEDS 5
 
@@ -17,7 +17,7 @@ void setup()
     pinMode(SWITCH_RED_LED, OUTPUT);
     pinMode(SWITCH_BLUE_LED, OUTPUT);
     pinMode(SWITCH_GREEN_LED, OUTPUT);
-    digitalWrite(SWITCH_RED_LED, HIGH);
+    analogWrite(SWITCH_RED_LED, 255);
     raspi_serial.begin(57600);
     FastLED.addLeds<WS2812, LED_BAR_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(5);
@@ -25,7 +25,7 @@ void setup()
     FastLED.show();
 
     //대기 시간이 길거나 짧으면 여기 수정
-    MsTimer2::set(2800, bootWaitFunc);
+    MsTimer2::set(2800, bootWaitFunc); //zero: 7500
     MsTimer2::start();
 }
 

@@ -17,9 +17,9 @@ int main(char *argc, char *argv[])
 {
     if (checkHostFile() == false)
     {
-        printf("hostFile initialization\n");
+        printf("hostFile initialization failed\n");
     }
-
+    
     if ((initRealPath(argv[0]) && initUsbMountPath() && initNVAPath()) == false)
     {
         printf("Path initialization failed");

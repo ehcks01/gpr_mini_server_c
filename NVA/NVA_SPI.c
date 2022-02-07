@@ -8,7 +8,7 @@
 
 void SPI_Transfer(int deviceNumber, unsigned char tx[], int size)
 {
-    wiringPiSPIDataRW(SPI_CHANNEL, tx, size);
+    wiringPiSPIDataRW(deviceNumber, tx, size);
 }
 
 void SetReadBuffer(unsigned char tx[], unsigned char command, int arrayLength, int byteLength)

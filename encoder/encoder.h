@@ -17,9 +17,9 @@
 #define SPI_SPEED 8000000
 
 //gpio 설정 encoder
-#define ENCODER_PIN1 21 //BCM 5
-#define ENCODER_PIN2 22 //BMC 6
-#define ENCODER_POWER_PIN 26 //BCM 12
+#define ENCODER_PIN1 11 
+#define ENCODER_PIN2 31 
+#define ENCODER_POWER_PIN 30 
 
 //gpio 설정 laser
 #define LASER_PIN 25 //BCM 26

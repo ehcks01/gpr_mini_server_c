@@ -140,20 +140,23 @@ void stopAcq()
 
 void startAcq()
 {
-    struct stat st = {0};
-    if (stat(acqCon.savePath, &st) == -1)
+    if (acqCon.savePath != NULL)
     {
-        mkdirs(acqCon.savePath);
+        struct stat st = {0};
+        if (stat(acqCon.savePath, &st) == -1)
+        {
+            mkdirs(acqCon.savePath);
+        }
+        acqCon.dataCnt = 0;
+        char *path = getFullPath(acqCon.savePath, acqCon.fileName);
+        acqCon.fp = fopen(path, "wb");
+        if (acqCon.fp != NULL)
+        {
+            fseek(acqCon.fp, fixHeaderSize, SEEK_SET);
+        }
+        free(path);
+        acqCon.runAcq = true;
     }
-    acqCon.dataCnt = 0;
-    char *path = getFullPath(acqCon.savePath, acqCon.fileName);
-    acqCon.fp = fopen(path, "wb");
-    if (acqCon.fp != NULL)
-    {
-        fseek(acqCon.fp, fixHeaderSize, SEEK_SET);
-    }
-    free(path);
-    acqCon.runAcq = true;
 }
 
 void frontRowData()
