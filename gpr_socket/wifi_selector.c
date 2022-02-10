@@ -141,7 +141,7 @@ bool checkHostFile()
     char buf[1024];
 
     char *hostLines[HOST_LINE_CTN] = {
-        "country_code=GB\n",
+        "country_code=KR\n",
         "interface=wlan0\n",
         "ssid=GPR_MOBILE\n",
         "hw_mode=g\n",
