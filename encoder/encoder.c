@@ -133,9 +133,9 @@ void readBatterGauge()
     //30%아래는 비중을 절반으로 떨어드려 15%만 차지하게 할려고함.. 수학적으로 간단하게 가능하면 정리되면 좋을듯 ㅠ
     if (normalGauage > 0)
     {
-        int normalConsuomeRate = 100 - fastConsuomRate;
-        int normalConsuomeGauage = fullGauge - fastConsuomeGauage;
-        battery_gauge = (int)(normalGauage * normalConsuomeRate / normalConsuomeGauage + fastConsuomRate);
+        int normalConsumeRate = 100 - fastConsuomRate;
+        int normalConsumeGauage = fullGauge - fastConsuomeGauage;
+        battery_gauge = (int)(normalGauage * normalConsumeRate / normalConsumeGauage + fastConsuomRate);
     }
     else if (currentGauge > 0)
     {
