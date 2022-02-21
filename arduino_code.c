@@ -25,7 +25,7 @@ void setup()
     FastLED.show();
 
     //대기 시간이 길거나 짧으면 여기 수정
-    MsTimer2::set(2800, bootWaitFunc); //zero: 7500
+    MsTimer2::set(3600, bootWaitFunc); //zero: 7500 //zero: 2800, 3600
     MsTimer2::start();
 }
 
@@ -47,19 +47,19 @@ void loop()
         }
         else if (inString.indexOf("server on") >= 0)
         {
-            digitalWrite(SWITCH_BLUE_LED, HIGH);
+            digitalWrite(SWITCH_GREEN_LED, HIGH);
         }
         else if (inString.indexOf("server off") >= 0)
         {
-            digitalWrite(SWITCH_BLUE_LED, LOW);
+            digitalWrite(SWITCH_GREEN_LED, LOW);
         }
         else if (inString.indexOf("client on") >= 0)
         {
-            digitalWrite(SWITCH_GREEN_LED, HIGH);
+            digitalWrite(SWITCH_BLUE_LED, HIGH);
         }
         else if (inString.indexOf("client off") >= 0)
         {
-            digitalWrite(SWITCH_GREEN_LED, LOW);
+            digitalWrite(SWITCH_BLUE_LED, LOW);
         }
     }
 }
