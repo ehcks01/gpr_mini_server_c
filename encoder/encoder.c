@@ -33,7 +33,7 @@ void encoder_interrupt(void)
             {
                 half_useage = false;
                 int pin1_value = digitalRead(ENCODER_PIN1);
-                if ((pin2_value == pin1_value && acqCon.bForwardScan) || (pin2_value != pin1_value && !acqCon.bForwardScan))
+                if ((pin2_value != pin1_value && acqCon.bForwardScan) || (pin2_value == pin1_value && !acqCon.bForwardScan))
                 {
                     GPR_Capture_raw(0);
                     frontRowData();
