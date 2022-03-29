@@ -8,7 +8,7 @@
 #define ADS_ADDR 0x48
 // #define MIN_BATTERY 11100 //5.5v
 // #define MAX_BATTERY 24500 //11.7v
-#define MAX_BATTERY 26300 //약 12.5~6v
+#define MAX_BATTERY 24300 //blue: 24700 //black: 23300 //red: 24300 //26300 //약 12.5~6v
 #define MIN_BATTERY 11400 //5.5v
 #define LOW_RATE_BATTERY 30 //30%부터는 용량을 절반으로 계산
 

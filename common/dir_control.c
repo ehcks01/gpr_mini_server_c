@@ -164,6 +164,19 @@ bool deleteDir(char *path)
 
 void deleteDirList(cJSON *list)
 {
+    //파일 삭제부터 먼저함 - 폴더 안에 파일 있으면 삭제가 안됨
+    for (int i = cJSON_GetArraySize(list) - 1; i >= 0; i--)
+    {
+        cJSON *subitem = cJSON_GetArrayItem(list, i);
+        char *tempPath = cJSON_GetObjectItem(subitem, "path")->valuestring;
+
+        if (!cJSON_IsTrue(cJSON_GetObjectItem(subitem, "isDir")))
+        {
+           deleteFile(tempPath);
+        }
+    }
+
+    //폴더 삭제는 뒤에.. 이거 폴더 안에 폴더 남아 있으면 삭제 안됨. 수정 필요함
     for (int i = cJSON_GetArraySize(list) - 1; i >= 0; i--)
     {
         cJSON *subitem = cJSON_GetArrayItem(list, i);
@@ -172,10 +185,6 @@ void deleteDirList(cJSON *list)
         if (cJSON_IsTrue(cJSON_GetObjectItem(subitem, "isDir")))
         {
             deleteDir(tempPath);
-        }
-        else
-        {
-            deleteFile(tempPath);
         }
     }
 }

@@ -109,7 +109,6 @@ void *setBatteryGauge(void *arg)
     {
         readBatterGauge();
         char str[50];
-        sprintf(str, "battery gauge:%d\n", battery_gauge);
         serialPuts(arduino_serial_fd, str);
         sleep(5);
     }
@@ -119,6 +118,7 @@ void readBatterGauge()
 {
     //배터리 전압값 읽기
     int analog1 = analogRead(PINBASE + 1);
+    // printf("battery: %d\n", analog1);
     //배터리 총 용량
     int fullGauge = MAX_BATTERY - MIN_BATTERY;
     //읽은 전압값의 배터리 용량
