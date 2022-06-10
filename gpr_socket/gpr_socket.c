@@ -295,11 +295,23 @@ void socket_read(char buffer[], int buff_size)
                 break;
             }
             case WIFI_CHANNEL_CHANGE_FTN:
+            {
+                char *channel = *(tcpData.event_list + i) + 1;
+                char str[40];
                 log_info("%s", "WIFI_CHANNEL_CHANGE_FTN");
-                changeWifiChannel(*(tcpData.event_list + i) + 1);
-                server_restart = true;
                 socket_write(SOCKET_CLOSE_NTF, "", 0);
+                switchServerOFF();
+                pclose(popen("sudo ifconfig wlan0 down", "r"));
+                changeWifiChannel(channel);
+               
+                sprintf(str, "sudo iw dev wlan0 set channel %s\0", channel);
+                pclose(popen(str, "r"));
+                pclose(popen("sudo ifconfig wlan0 up", "r"));
+                switchServerON();
+                //server_restart = true;
+                
                 break;
+            }
             default:
                 break;
             }

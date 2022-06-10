@@ -68,16 +68,16 @@ int main(char *argc, char *argv[])
             socket_client_done();
             switchClientOFF();
             log_info("%s", "socket_client_done");
-            if (server_restart)
-            {
-                break;
-            }
+            // if (server_restart)
+            // {
+            //     break;
+            // }
         }
         log_info("%s", "server_restartt");
         socket_server_done();
-        switchServerOFF();
-        pclose(popen("sudo service hostapd restart", "r"));
-        sleep(2);
+        // switchServerOFF();
+        // pclose(popen("sudo service hostapd restart", "r"));
+        // sleep(2);
     }
     fclose(fp_log);
     return 0;
