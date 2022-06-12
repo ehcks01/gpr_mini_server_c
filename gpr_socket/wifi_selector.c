@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "wifi_selector.h"
 #include "gpr_socket.h"
@@ -94,58 +95,53 @@ char *getWifiInfoList()
 
 void changeWifiChannel(char *channel)
 {
-    FILE *copyFile, *oriFile;
-    char buf[1024];
+    // FILE *copyFile, *oriFile;
+    // char buf[1024];
 
-    pclose(popen("sudo chmod 777 /etc/hostapd/hostapd.conf", "r"));
+    // pclose(popen("sudo chmod 777 /etc/hostapd/hostapd.conf", "r"));
 
-    oriFile = fopen("/etc/hostapd/hostapd.conf", "r");
-    copyFile = fopen("/etc/hostapd/hostapd.conf.copy", "w");
+    // oriFile = fopen("/etc/hostapd/hostapd.conf", "r");
+    // copyFile = fopen("/etc/hostapd/hostapd.conf.copy", "w");
 
-    if (oriFile != NULL && copyFile != NULL)
-    {
-        while (fgets(buf, 1024, oriFile) != NULL)
-        {
-            if (strstr(buf, "channel=") != NULL)
-            {
-                char str[20];
-                sprintf(str, "channel=%s\n", channel);
-                fprintf(copyFile, str);
-            }
-            else
-            {
-                fprintf(copyFile, buf);
-            }
-        }
-        pclose(popen("sudo mv /etc/hostapd/hostapd.conf.copy /etc/hostapd/hostapd.conf", "r"));
-        fclose(copyFile);
-        fclose(oriFile);
-    }
-    else
-    {
-        if (copyFile != NULL)
-        {
-            fclose(copyFile);
-        }
+    // if (oriFile != NULL && copyFile != NULL)
+    // {
+    //     while (fgets(buf, 1024, oriFile) != NULL)
+    //     {
+    //         if (strstr(buf, "channel=") != NULL)
+    //         {
+    //             char str[20];
+    //             sprintf(str, "channel=%s\n", channel);
+    //             fprintf(copyFile, str);
+    //         }
+    //         else
+    //         {
+    //             fprintf(copyFile, buf);
+    //         }
+    //     }
+    //     pclose(popen("sudo mv /etc/hostapd/hostapd.conf.copy /etc/hostapd/hostapd.conf", "r"));
+    //     fclose(copyFile);
+    //     fclose(oriFile);
+    // }
+    // else
+    // {
+    //     if (copyFile != NULL)
+    //     {
+    //         fclose(copyFile);
+    //     }
 
-        if (oriFile != NULL)
-        {
-            fclose(oriFile);
-        }
-    }
-}
-
-bool checkHostFile()
-{
+    //     if (oriFile != NULL)
+    //     {
+    //         fclose(oriFile);
+    //     }
+    // }
     FILE *file;
     char buf[1024];
 
-    char *hostLines[HOST_LINE_CTN] = {
+    char *hostLines[7] = {
         "country_code=KR\n",
         "interface=wlan0\n",
         "ssid=GPR_MOBILE\n",
         "hw_mode=g\n",
-        "channel=7\n",
         "macaddr_acl=0\n",
         "auth_algs=1\n",
         "ignore_broadcast_ssid=0\n"};
@@ -165,6 +161,51 @@ bool checkHostFile()
         "channel=12\n",
         "channel=13\n"};
 
+    //pclose(popen("sudo chmod 777 /etc/hostapd/hostapd.conf", "r"));
+    file = fopen("/etc/hostapd/hostapd.conf", "w");
+    if (file != NULL)
+    {
+        for (int i = 0; i < 7; i++)
+        {
+            fprintf(file, hostLines[i]);
+        }
+        fprintf(file, channelList[atoi(channel)-1]);
+        fclose(file);
+    }
+}
+
+bool checkHostFile()
+{
+    FILE *file;
+    char buf[1024];
+
+    char *hostLines[HOST_LINE_CTN] = {
+        "country_code=KR\n",
+        "interface=wlan0\n",
+        "ssid=GPR_MOBILE\n",
+        "hw_mode=g\n",
+        "macaddr_acl=0\n",
+        "auth_algs=1\n",
+        "ignore_broadcast_ssid=0\n",
+        "channel=7\n"};
+        
+
+    char *channelList[WIFI_CHANNEL_CTN] = {
+        "channel=1\n",
+        "channel=2\n",
+        "channel=3\n",
+        "channel=4\n",
+        "channel=5\n",
+        "channel=6\n",
+        "channel=7\n",
+        "channel=8\n",
+        "channel=9\n",
+        "channel=10\n",
+        "channel=11\n",
+        "channel=12\n",
+        "channel=13\n"};
+
+    //pclose(popen("sudo chmod 777 /etc/hostapd/hostapd.conf", "r"));
     file = fopen("/etc/hostapd/hostapd.conf", "r");
     bool chekLines = true;
     int lineIndex = 0;
@@ -174,7 +215,7 @@ bool checkHostFile()
 
         while (fgets(buf, 1024, file) != NULL && lineIndex < HOST_LINE_CTN)
         {
-            if (lineIndex != 4)
+            if (lineIndex != 7)
             {
                 if (strcmp(buf, hostLines[lineIndex]) != 0)
                 {
@@ -223,9 +264,21 @@ bool checkHostFile()
             }
             fclose(file);
             chekLines = true;
-            pclose(popen("sudo service hostapd restart", "r"));
+            select_channel = 7;
         }
     }
 
     return chekLines;
+}
+
+void wifiRestartCommand()
+{
+    char str[40];
+    pclose(popen("sudo ifconfig wlan0 down", "r"));
+    sprintf(str, "sudo iw dev wlan0 set channel %d\0", select_channel);
+    pclose(popen(str, "r"));
+    pclose(popen("sudo ifconfig wlan0 up", "r"));
+    sleep(1);
+    pclose(popen("sudo service networking restart", "r"));
+    pclose(popen("sudo service hostapd restart", "r"));
 }

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define PORT 4000
-extern int server_socket, client_socket;
+extern int server_socket, client_socket, select_channel;
 extern bool server_restart;
 
 bool socket_ready();

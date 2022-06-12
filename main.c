@@ -19,7 +19,7 @@ int main(char *argc, char *argv[])
     {
         printf("hostFile initialization failed\n");
     }
-    
+
     if ((initRealPath(argv[0]) && initUsbMountPath() && initNVAPath()) == false)
     {
         printf("Path initialization failed");
@@ -68,16 +68,15 @@ int main(char *argc, char *argv[])
             socket_client_done();
             switchClientOFF();
             log_info("%s", "socket_client_done");
-            // if (server_restart)
-            // {
-            //     break;
-            // }
+            if (server_restart)
+            {
+                break;
+            }
         }
-        log_info("%s", "server_restartt");
+        log_info("%s", "server_restart");
+        switchServerOFF();
         socket_server_done();
-        // switchServerOFF();
-        // pclose(popen("sudo service hostapd restart", "r"));
-        // sleep(2);
+        wifiRestartCommand();
     }
     fclose(fp_log);
     return 0;
