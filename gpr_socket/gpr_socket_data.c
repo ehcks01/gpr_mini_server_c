@@ -1,16 +1,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "gpr_socket.h"
 #include "gpr_socket_data.h"
 #include "gpr_socket_acq.h"
 #include "../common/gpr_param.h"
 #include "../common/cJSON.h"
 
-struct TcpData tcpData = {.event_length = 0, .total_length = 0, .event_list_cnt = 0};
+struct TcpData tcpData = {.index = 0, .length = 0, .checkSum = 0, .data_buffer = NULL};
 
 int bytesToInt(char *buffer, int size)
 {
-    //little endian
+    // little endian
     int integer = 0;
     for (int i = 0; i < size; i++)
     {
@@ -21,7 +22,7 @@ int bytesToInt(char *buffer, int size)
 
 void intToBytes(int integer, char *buffer, int size)
 {
-    //little endian
+    // little endian
     for (int i = 0; i < size; i++)
     {
         buffer[i] = (integer >> i * 8);
@@ -30,63 +31,52 @@ void intToBytes(int integer, char *buffer, int size)
 
 void convertEvent(char buffer[], int buffer_size)
 {
-    //버퍼를 기존에 버퍼랑 합침
-    char *tempBuffer = (char *)calloc(tcpData.total_length + buffer_size, 1);
-    memcpy(tempBuffer, tcpData.total_buffer, tcpData.total_length);
-    memcpy(tempBuffer + tcpData.total_length, buffer, buffer_size);
-    free(tcpData.total_buffer);
-    tcpData.total_buffer = tempBuffer;
-    tcpData.total_length += buffer_size;
-    int intSize = sizeof(int);
-    while ((tcpData.event_length == 0 && tcpData.total_length > intSize) ||
-           (tcpData.event_length != 0 && tcpData.event_length <= tcpData.total_length))
+    for (int i = 0; i < buffer_size; i++)
     {
-        //버퍼가 최소 이벤트 사이즈 5보다 크면 사이즈를 알아냄
-        if (tcpData.event_length == 0 && tcpData.total_length > intSize)
+        if (tcpData.index == 0)
         {
-            tcpData.total_length -= intSize;
-            tempBuffer = (char *)calloc(tcpData.total_length, 1);
-            tcpData.event_length = bytesToInt(tcpData.total_buffer, intSize);
-            memcpy(tempBuffer, tcpData.total_buffer + intSize, tcpData.total_length);
-            free(tcpData.total_buffer);
-            tcpData.total_buffer = tempBuffer;
-        }
-
-        //사이즈만큼 있다면 이벤트를 버퍼에서 추출
-        if (tcpData.event_length != 0 && tcpData.event_length <= tcpData.total_length)
-        {
-            //이벤트를 버퍼에서 추출
-            char *event = (char *)calloc(tcpData.event_length, 1);
-            memcpy(event, tcpData.total_buffer, tcpData.event_length);
-
-            //빼낸 만큼 버퍼 재조절
-            tcpData.total_length -= tcpData.event_length;
-            if (tcpData.total_length > 0)
+            if (buffer[i] == 0x7E)
             {
-                tempBuffer = (char *)calloc(tcpData.total_length, 1);
-                memcpy(tempBuffer, tcpData.total_buffer + tcpData.event_length, tcpData.total_length);
-                free(tcpData.total_buffer);
-                tcpData.total_buffer = tempBuffer;
+                tcpData.index++;
             }
-
-            //이벤트를 이벤트 리스트에 추가
-            tcpData.event_list_cnt++;
-            char **temp_event_list = calloc(tcpData.event_list_cnt, intSize);
-            int end_index = (tcpData.event_list_cnt - 1);
-            memcpy(temp_event_list, tcpData.event_list, end_index * intSize);
-            *(temp_event_list + end_index) = event;
-            free(tcpData.event_list);
-            tcpData.event_list = temp_event_list;
-
-            //이벤트 리스트에 추가한 이벤트의 사이즈 기록
-            int *temp_event_length_list = calloc(tcpData.event_list_cnt, intSize);
-            memcpy(temp_event_length_list, tcpData.event_list, end_index * intSize);
-            *(temp_event_length_list + end_index) = tcpData.event_length;
-            free(tcpData.event_length_list);
-            tcpData.event_length_list = temp_event_length_list;
-
-            tcpData.event_length = 0;
+            continue;
         }
+
+        // length 1-2 (2byte)
+        if (tcpData.index == 1)
+        {
+            tcpData.length = buffer[i];
+        }
+        else if (tcpData.index == 2)
+        {
+            tcpData.length = (tcpData.length << 8) + buffer[i];
+            tcpData.data_buffer = (char *)calloc(tcpData.length, 1);
+        }
+        // frameType
+        else if (tcpData.index == 3)
+        {
+            tcpData.checkSum += buffer[i];
+            tcpData.data_buffer[0] = buffer[i];
+        }
+        else if (tcpData.index < tcpData.length + 3)
+        {
+            tcpData.checkSum += buffer[i];
+            tcpData.data_buffer[tcpData.index - 3] = buffer[i];
+        }
+        else
+        {
+            tcpData.checkSum += buffer[i];
+            if ((tcpData.checkSum & 0xFF) == 0xFF)
+            {
+                socket_read(tcpData.data_buffer, tcpData.length);
+            }
+            //초기화
+            tcpData.checkSum = 0;
+            tcpData.index = -1;
+            tcpData.length = 0;
+            free(tcpData.data_buffer);
+        }
+        tcpData.index++;
     }
 }
 

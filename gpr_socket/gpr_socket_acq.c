@@ -204,8 +204,7 @@ bool saveAcq(char *headerInfo, int size)
     if (fp != NULL)
     {
         fseek(fp, 0, SEEK_SET);
-        //앞에 1바이트는 socket code라서 제외 시킴
-        fwrite(headerInfo, 1, size - 1, fp);
+        fwrite(headerInfo, 1, size, fp);
         fclose(fp);
         saveState = true;
         printf("file save successed: %s \n", path);

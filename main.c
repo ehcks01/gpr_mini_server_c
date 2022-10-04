@@ -15,10 +15,11 @@
 
 int main(char *argc, char *argv[])
 {
-    if (checkHostFile() == false)
-    {
-        printf("hostFile initialization failed\n");
-    }
+    //hostpad 파일을 복구 시키려고 했으나, 여기서 네트워크가 영구 다운되는 증상 때문에 보류
+    // if (checkHostFile() == false)
+    // {
+    //     printf("hostFile initialization failed\n");
+    // }
 
     if ((initRealPath(argv[0]) && initUsbMountPath() && initNVAPath()) == false)
     {
@@ -53,16 +54,12 @@ int main(char *argc, char *argv[])
                 continue;
             }
             log_info("%s", "socket_client_accept");
-            //tcp data 부분 초기화
-            tcpData.event_length = 0;
-            tcpData.total_length = 0;
-            tcpData.event_list_cnt = 0;
 
             switchClientON();
             socket_write(CONNECTION_NTF, "", 0);
             while ((buff_size = socket_receive(buff_rcv)) > 0)
             {
-                socket_read(buff_rcv, buff_size);
+                convertEvent(buff_rcv, buff_size);
             }
             socket_close();
             socket_client_done();

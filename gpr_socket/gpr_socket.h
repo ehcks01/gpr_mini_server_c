@@ -12,7 +12,7 @@ int socket_client_accept();
 int socket_receive(char *buff_rcv);
 void socket_client_done();
 void socket_server_done();
-void socket_write(char code, void *bytes, int size);
+void socket_write(char code, char *bytes, int size);
 void sendSavePath();
 void socket_read(char buffer[], int buff_size);
 void socket_close();
