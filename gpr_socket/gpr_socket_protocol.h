@@ -32,6 +32,7 @@ extern enum SocketProtocol
     ACQ_REFRESH_NTF = 0x1A,
     ACQ_BACK_DATA_NTF = 0x1B,
     ACQ_SAVE_FAILED_NTF = 0x1C,
+    ACQ_DATE_TIME_FTN = 0x1D,
 
     //wifi 채널 리스트 요청
     WIFI_CHANNEL_LIST_FTN = 0x21,

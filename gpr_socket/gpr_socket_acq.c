@@ -217,6 +217,15 @@ bool saveAcq(char *headerInfo, int size)
     return saveState;
 }
 
+void acqDateTime(char *dateTime, int size)
+{
+    char timeStr[size], buf[200];
+    strncpy(timeStr, dateTime, size);
+    sprintf(buf, "sudo timedatectl set-time '%s'", timeStr);
+    pclose(popen("sudo timedatectl set-ntp false", "r"));
+    pclose(popen(buf, "r"));
+}
+
 void acqOn()
 {
     digitalWrite(LASER_PIN, HIGH);

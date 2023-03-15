@@ -31,6 +31,7 @@ void startAcq();
 void frontRowData();
 void backRowData();
 bool saveAcq(char *headerInfo, int size);
+void acqDateTime(char *dateTime, int size);
 void acqOn();
 void acqOff();
 

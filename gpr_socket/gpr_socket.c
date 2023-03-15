@@ -200,12 +200,16 @@ void socket_read(char buffer[], int buff_size)
             startAcq();
         }
         break;
+    case ACQ_DATE_TIME_FTN:
+        log_info("%s", "ACQ_DATE_TIME_FTN");
+        acqDateTime(buffer + 1, buff_size - 1);
+        break;
     case ACQ_ABNORMAL_QUIT:
         log_info("%s", "ACQ_ABNORMAL_QUIT");
         stopAcq();
         if (is2DScanMode())
         {
-            deleteAcqFile(); //파일 삭제
+            deleteAcqFile(); // 파일 삭제
         }
         else
         {
