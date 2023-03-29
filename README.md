@@ -27,6 +27,7 @@ CMakeList - c언어 cmake 빌드를 하기 위한 설정
 acduino-code - led를 제어하는 아두이노 코드
 host_restart.sh - wifi 채널변경을 쉘스크립트에서 소켓서버 재시작을 하려다가 정상동작 안하는 경우가 많아 현재는 사용안함
 How to Program an AVR_Ardiono.. - 라즈베리에서 아두이노로 소스 업로드 하기 위한 가이드 파일
+checksum 예제 - 소켓통신 checksum 만드는 과정 예제. Xbee 통신모듈을 참고하여 만듬
 
 [c프로그램 빌드방법]
 폴더: common, encoder, gpr_socket, NVA
