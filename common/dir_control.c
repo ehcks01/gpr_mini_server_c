@@ -12,11 +12,13 @@
 #include "cJSON.h"
 #include "usb_control.h"
 
-char strRealPath[100]; //경로까지
+char strRealPath[100]; //실행 파일 경로
 char strExeName[100];  //실행 파일 이름
 
+//프로그램의 이름과 실행경로를 구함
 bool initRealPath(char *argv0)
 {
+    //프로그램 전체 경로 구함
     char *res = realpath(argv0, strRealPath);
 
     if (!res)
@@ -35,12 +37,15 @@ bool initRealPath(char *argv0)
         }
         size_t reSize = strlen(copyStr) - strlen(lastPtr) - 1;
         memset(res, 0, sizeof(res));
+        //프로그램 실행경로
         strncpy(res, copyStr, reSize);
+        //프로그램 이름
         strcpy(strExeName, lastPtr);
         return true;
     }
 }
 
+//경로와 파일이름을 합쳐서 반환
 char *getFullPath(const char *path, const char *filename)
 {
     char *fullPath = calloc(strlen(path) + strlen(filename) + 2, 1);
@@ -50,6 +55,7 @@ char *getFullPath(const char *path, const char *filename)
     return fullPath;
 }
 
+//라즈베리 OS에 경로를 폴더로 생성
 void mkdirs(char *dir)
 {
     char tmp[2048];
@@ -74,6 +80,7 @@ void mkdirs(char *dir)
     mkdir(tmp, S_IRWXU);
 }
 
+//라즈베리 OS에서 파일을 복사
 bool copyFile(const char *to, const char *from)
 {
     int fd_to, fd_from;
@@ -134,6 +141,8 @@ out_error:
     return false;
 }
 
+
+//라즈베리 OS에서 파일을 삭제
 bool deleteFile(char *path)
 {
     if (unlink(path) == 0)
@@ -148,6 +157,7 @@ bool deleteFile(char *path)
     }
 }
 
+//라즈베리 OS에서 폴더를 삭제
 bool deleteDir(char *path)
 {
     if (rmdir(path) == 0)
@@ -162,9 +172,10 @@ bool deleteDir(char *path)
     }
 }
 
+//라즈베리 OS에서 경로들을 삭제
 void deleteDirList(cJSON *list)
 {
-    //파일 삭제부터 먼저함 - 폴더 안에 파일 있으면 삭제가 안됨
+    //먼저 파일을 삭제함 - 파일이 있으면 폴더 삭제가 안됨
     for (int i = cJSON_GetArraySize(list) - 1; i >= 0; i--)
     {
         cJSON *subitem = cJSON_GetArrayItem(list, i);
@@ -176,7 +187,7 @@ void deleteDirList(cJSON *list)
         }
     }
 
-    //폴더 삭제는 뒤에.. 이거 폴더 안에 폴더 남아 있으면 삭제 안됨. 수정 필요함
+    //폴더를 삭제함. 한번씩 삭제가 여기서 문제가 있는지 확인
     for (int i = cJSON_GetArraySize(list) - 1; i >= 0; i--)
     {
         cJSON *subitem = cJSON_GetArrayItem(list, i);
@@ -189,6 +200,7 @@ void deleteDirList(cJSON *list)
     }
 }
 
+//해당 경로 정보를 json 형태로 변환.
 void addDirInfo(cJSON *root, char *path)
 {
     struct stat stat_path;
@@ -219,6 +231,7 @@ void addDirInfo(cJSON *root, char *path)
     cJSON_AddNumberToObject(file, "size", stat_path.st_size);
 }
 
+//해당 경로 및 하위 경로정보 까지 json 형태로 변환.
 void getDirList(cJSON *root, char *path, bool repet)
 {
     DIR *dir;
@@ -301,6 +314,7 @@ void getDirList(cJSON *root, char *path, bool repet)
     closedir(dir);
 }
 
+//파일 형태가 올바른지 256byte 헤더 정보를 확인
 bool checkHeaderInfoFromAcqFile(char *path)
 {
     if (strstr(path, ".MGM") == NULL)
@@ -329,6 +343,7 @@ bool checkHeaderInfoFromAcqFile(char *path)
     }
 }
 
+//전체 경로에서 파일이름 추출
 char *getFileNameFromPath(char *path)
 {
     if (path == NULL)
@@ -344,6 +359,7 @@ char *getFileNameFromPath(char *path)
     return pFileName;
 }
 
+//라즈베리 OS 또는 마운트한 usb의 디스크 사이즈 구하기
 cJSON *getDiskSize(char *path)
 {
     FILE *file;

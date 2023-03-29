@@ -7,8 +7,10 @@
 #include "../common/gpr_param.h"
 #include "../common/cJSON.h"
 
+//소켓통신으로 클라이언트에서 받은 버퍼 정보
 struct TcpData tcpData = {.index = 0, .length = 0, .checkSum = 0, .data_buffer = NULL};
 
+//바이트를 인트형태로 바꿈
 int bytesToInt(char *buffer, int size)
 {
     // little endian
@@ -20,6 +22,7 @@ int bytesToInt(char *buffer, int size)
     return integer;
 }
 
+//인트를 바이트 버퍼형태로 바꿈
 void intToBytes(int integer, char *buffer, int size)
 {
     // little endian
@@ -29,12 +32,15 @@ void intToBytes(int integer, char *buffer, int size)
     }
 }
 
+//클라이언트에서 받은 버퍼를 이벤트로 변환
 void convertEvent(char buffer[], int buffer_size)
 {
     for (int i = 0; i < buffer_size; i++)
     {
+        //버퍼 인덱스가 0이면
         if (tcpData.index == 0)
         {
+            //이벤트 시작은 0x7E로 정했으므로 다른 byte는 버림
             if (buffer[i] == 0x7E)
             {
                 tcpData.index++;
@@ -42,7 +48,7 @@ void convertEvent(char buffer[], int buffer_size)
             continue;
         }
 
-        // length 1-2 (2byte)
+        // 버퍼 인덱스 1~2까지는 전송된 이벤트 길이, length(2byte)
         if (tcpData.index == 1)
         {
             tcpData.length = buffer[i];
@@ -50,24 +56,30 @@ void convertEvent(char buffer[], int buffer_size)
         else if (tcpData.index == 2)
         {
             tcpData.length = (tcpData.length << 8) + buffer[i];
+            //길이 만큼 data_buffer 메모리 할당        
             tcpData.data_buffer = (char *)calloc(tcpData.length, 1);
         }
-        // frameType
         else if (tcpData.index == 3)
         {
+            //전송된 데이터가 정확한지 확인하기 위해 합산 checksum 
             tcpData.checkSum += buffer[i];
+            //gpr_socekt_protocol.h에 정의한 code 값
             tcpData.data_buffer[0] = buffer[i];
         }
         else if (tcpData.index < tcpData.length + 3)
         {
             tcpData.checkSum += buffer[i];
+            //첨부한 데이터 값
             tcpData.data_buffer[tcpData.index - 3] = buffer[i];
         }
         else
         {
             tcpData.checkSum += buffer[i];
+
+            //전송이 완료되면 checkSum이 0xFF가 나오는지 확인
             if ((tcpData.checkSum & 0xFF) == 0xFF)
             {
+                //이벤트 처리
                 socket_read(tcpData.data_buffer, tcpData.length);
             }
             //초기화
@@ -80,6 +92,7 @@ void convertEvent(char buffer[], int buffer_size)
     }
 }
 
+//분류된 토큰에서 불필요한 문자인 [, ], 공백 3가지 제거
 void eliminate_json(char *str)
 {
     while (*str != '\0')
@@ -93,32 +106,45 @@ void eliminate_json(char *str)
     }
 }
 
-//메모리 해제 필요
+//json 형태의 포맷을 string 형식으로 변환
 char *arrayCodeToStr(char *arrayCode)
 {
+    //앱에서 'KOREA'를 보내면 [75, 79, 82, 69, 65] 형태로 전송
     char temp_array[strlen(arrayCode)];
     strcpy(temp_array, arrayCode);
+
+    // 첫번째 구분자 찾기
     char *token = strtok(temp_array, ",");
     int token_index = 0;
     while (token != NULL)
     {
         token_index++;
+        //다음 구분자  찾기
         token = strtok(NULL, ",");
     }
 
+    //분류된 토큰의 길이로 동적메모리 할당
     char *str = (char *)calloc(token_index, 1);
+
+    //첫번째 구분자  찾기
     token = strtok(arrayCode, ",");
     token_index = 0;
     while (token != NULL)
     {
+        //분류된 토큰에서 불필요한 문자인 [, ], 공백 3가지 제거
         eliminate_json(token);
+        //char* 이므로 정수로 변환. 정확하지 않음..
         str[token_index] = atoi(token);
         token_index++;
+        //다음 구분자 찾기
         token = strtok(NULL, ",");
     }
+
+    //메모리 해제 필요
     return str;
 }
 
+//Header 정보를 가진 Json 포맷을 읽어서 원본 형태의 데이터로 추출
 void setHeaderFromJson(char *bytes)
 {
     cJSON *json = cJSON_Parse(bytes);
@@ -148,7 +174,9 @@ void setHeaderFromJson(char *bytes)
         // printf("fDielectric: %f\n", headerParameter.fDielectric);
 
         str = cJSON_GetObjectItem(json, "strSiteName")->valuestring;
+        printf("strSiteName: %s\n", str);
         str = arrayCodeToStr(str);
+        printf("strSiteName: %s\n", str);
         memset(headerParameter.strSiteName, 0, strlen(headerParameter.strSiteName));
         memcpy(headerParameter.strSiteName, str, strlen(str));
         free(str);
@@ -198,6 +226,7 @@ void setHeaderFromJson(char *bytes)
     }
 }
 
+//취득 관련 정보를 가진 Json 포맷을 읽어서 원본 형태의 데이터로 추출
 void setAcqInfoFromJson(char *bytes)
 {
     cJSON *json = cJSON_Parse(bytes);
@@ -236,7 +265,8 @@ void setAcqInfoFromJson(char *bytes)
     }
 }
 
-char *jsonOfsendSavePath()
+//파일이름과 저장경로를 json형태로 앱에 보내기 위해 변환
+char *jsonForsendSavePath()
 {
     cJSON *root;
     root = cJSON_CreateObject();

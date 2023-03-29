@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+//마운트한 usb 정보
 struct UsbData
 {
     char mountPath[100]; //mount 되는 경로

@@ -40,6 +40,7 @@ struct HeaderParameter
     //------파일 헤더 끝 ---------------//
 };
 
+//여기서 선언된 변수를 외부에서 사용하기 위함
 extern struct HeaderParameter headerParameter;
 extern const int fixHeaderSize;
 extern const int fixDepthDataSize;

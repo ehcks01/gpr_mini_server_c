@@ -16,8 +16,9 @@
 #include "../common/usb_control.h"
 
 pthread_t fileThread;
-pthread_t usbThread;
+pthread_t usbThread; //
 
+//데이터가 저장되는 경로를 앱에 전송
 void sendRootDir()
 {
     int pathLen = strlen(strRealPath) + strlen(fixDataRootName) + 1;
@@ -28,6 +29,7 @@ void sendRootDir()
     socket_write(ANA_ROOT_DIR_NTF, pathBuf, strlen(pathBuf));
 }
 
+//라즈베리의 디스크 사이즈를 앱에 전송
 void sendDiskSize()
 {
     cJSON *root = getDiskSize("/root");
@@ -37,6 +39,7 @@ void sendDiskSize()
     free(out);
 }
 
+//경로에 있는 파일,폴더 정보를 앱에 전송
 void sendReadDir(char *path, char protocol, bool repeat)
 {
     cJSON *root;
@@ -50,6 +53,7 @@ void sendReadDir(char *path, char protocol, bool repeat)
     free(out);
 }
 
+//삭제한 파일 정보를 앱에 전송
 void sendDeleteFile(char *path)
 {
     deleteFile(path);
@@ -63,6 +67,7 @@ void sendDeleteFile(char *path)
     free(out);
 }
 
+//삭제한 폴더 정보를 앱에 전송
 void sendDeleteFolder(char *path)
 {
     cJSON *list = cJSON_CreateArray();
@@ -91,6 +96,7 @@ void sendDeleteFolder(char *path)
     free(out);
 }
 
+//usb 정보를 읽어서 앱에 전송
 void sendUsbInFo()
 {
     char *out = getUsbInfo();
@@ -105,6 +111,7 @@ void sendUsbInFo()
     }
 }
 
+//라즈베리에 있는 파일들을 usb로 복사하면서 결과 앱에 전송.
 void *tryCopyFiles(void *arg)
 {
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
@@ -133,6 +140,7 @@ void *tryCopyFiles(void *arg)
                 }
             }
         }
+        //usb에 복사 완료를 앱에 전송
         socket_write(ANA_USB_COPY_DONE_NTF, "", 0);
     }
     else
@@ -142,6 +150,7 @@ void *tryCopyFiles(void *arg)
     pthread_cleanup_pop(arg);
 }
 
+//앱에 파일정보 보내는 쓰레드의 데이터타입 메모리 해제
 void fileSendCleanUp(void *arg)
 {
     struct ThreadSendFileInfo *sendInfo = arg;
@@ -150,11 +159,13 @@ void fileSendCleanUp(void *arg)
     free(sendInfo);
 }
 
+//앱에 파일정보 보내기 취소
 void threadSendFileCancel()
 {
     pthread_cancel(fileThread);
 }
 
+//앱에 파일정보 보내기
 void *sendFileData(void *arg)
 {
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
@@ -192,10 +203,12 @@ void *sendFileData(void *arg)
             socket_write(ANA_FILE_DATA_NTF, sendBuffer, fileLentDivideRest);
         }
     }
+    //파일전송 완료
     socket_write(sendInfo->socketCode, "", 0);
     pthread_cleanup_pop(arg);
 }
 
+//파일을 분석했던 세팅정보를 라즈베리에서 읽어서 앱에 전송
 void sendLoadConfiFile(char *path)
 {
     FILE *fileptr;
@@ -222,6 +235,7 @@ void sendLoadConfiFile(char *path)
     }
 }
 
+//파일을 분석한 세팅정보를 라즈베리에 저장하고 앱에 결과 전송
 void sendSaveConfigFile(char *bytes)
 {
     cJSON *json = cJSON_Parse(bytes);
@@ -242,6 +256,7 @@ void sendSaveConfigFile(char *bytes)
     socket_write(ANA_SAVE_CONFIG_FILE_NTF, "", 0);
 }
 
+//파일을 앱에 전송하는 쓰레드 생성
 void threadSendFileData(char *path, char responeSocketCode)
 {
     pthread_attr_t attr;
@@ -258,6 +273,7 @@ void threadSendFileData(char *path, char responeSocketCode)
     pthread_attr_destroy(&attr);
 }
 
+//파일을 usb에 복사하는 쓰레드 생성
 void threadUsbCopy(char *bytes)
 {
     pthread_attr_t attr;
@@ -268,12 +284,14 @@ void threadUsbCopy(char *bytes)
     pthread_attr_destroy(&attr);
 }
 
+//파일을 usb로 복사완료하면 usb를 언마운트까지 해줘야, 라즈베리OS에서 usb 파일 복사가 온전히 완료됨
 void usbCopyCleanUp(void *arg)
 {
     cJSON_Delete(arg);
     tryUsbUmount();
 }
 
+//파일을 USB로 복사 취소
 void threadUsbCopyCancel()
 {
     pthread_cancel(usbThread);

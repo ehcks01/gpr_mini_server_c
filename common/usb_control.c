@@ -9,19 +9,22 @@
 #include "dir_control.h"
 #include "gpr_param.h"
 
+//라즈베리에 usb가 제대로 언마운트가 안되면 다음 마운트 경로는 sda->sdb로 순차적으로 넘어감. 그래서 최대 10대 까지만 조회하게함.
 struct UsbData usbData;
 const int deviceNameCnt = 10;
 char *deviceName[10] = {"sda", "sdb", "sdc", "sdd", "sde", "sdf", "sdg", "sdh", "sdi", "sdj"};
 
+//usb가 마운트되면 usb 데이터와 연결되는 라즈베리 OS 경로
 bool initUsbMountPath()
 {
     char *usbPath = "/usb";
-    strcpy(usbData.mountPath, strRealPath);
+    strcpy(usbData.mountPath, strRealPath); //프로그램 실행경로
     strcat(usbData.mountPath, usbPath);
     mkdirs(usbData.mountPath);
     return true;
 }
 
+//연결된 usb를 찾으면 정보를 확인. 처음 발견한 usb 하나만 조회
 char *getUsbInfo()
 {
     tryUsbUmount();
@@ -51,6 +54,7 @@ char *getUsbInfo()
     return out;
 }
 
+//usb 디바이스 이름을 라즈베리에서 조회
 bool findUsb(char name[])
 {
     bool isFind = false;
@@ -104,6 +108,8 @@ bool findUsb(char name[])
     return isFind;
 }
 
+
+//usb가 조회되면, '프로그램 실행경로/usb' 폴더로 마운트 시도
 bool tryUsbMount()
 {
     if (usbData.fsType[0] == 0)
@@ -128,6 +134,7 @@ bool tryUsbMount()
     }
 }
 
+//마운트된 usb를 제거할 수 있게 언마운트
 void tryUsbUmount()
 {
     int umounting = umount(usbData.mountPath);
@@ -138,6 +145,7 @@ void tryUsbUmount()
     pclose(file);
 }
 
+//데이터 경로를 마운트한 usb 경로로 변환
 char *changeSDPathToUsbPath(char *sdPath)
 {
     char *restPath = sdPath + strlen(strRealPath);
@@ -153,6 +161,7 @@ char *changeSDPathToUsbPath(char *sdPath)
     return NULL;
 }
 
+//파일을 마운트한 usb로 복사
 bool copyFileToUsb(char *path, char *name)
 {
     //1. 저장된 경로에서 파일이름을 제외한 폴더 경로만 추출
@@ -174,6 +183,7 @@ bool copyFileToUsb(char *path, char *name)
     return result;
 }
 
+//폴더를 마운트한 usb로 복사
 void copyFolderToUsb(char *path)
 {
     //copy라고 쓰고.. 폴더를 만듬

@@ -12,27 +12,30 @@
 #include "../gpr_socket/gpr_socket_acq.h"
 #include "../NVA/NVA_CON.h"
 
-bool half_useage = true;
-int battery_gauge = 0;
-int arduino_serial_fd;
+int battery_gauge = 0; //배터리양
+int arduino_serial_fd; //아두이나와 연결된 시리얼포트
 
+//엔코더 인터럽트 발생 처리
 void encoder_interrupt(void)
 {
+    //앱이 취득상태인지, 2D 모드인지, 3D 모드면 목표거리를 채웠는지
     if (acqCon.runAcq && (is2DScanMode() || isNotFull3DData()))
     {
-        // 1, 0 값을 다 읽으면 분해능이 200이 나오므로 1일때만 읽음
+        // 1, 0 값을 다 읽으면 분해능이 200이 나오므로 1일때만 읽음 (바퀴 한바퀴에 200번 인터럽트 발생)
         int pin2_value = digitalRead(ENCODER_PIN2);
         if (pin2_value == 1)
         {
             int pin1_value = digitalRead(ENCODER_PIN1);
+
+            //앱에서 설정한 취득방향이 전방인지 후방인지 확인해서 바퀴방향 설정
             if ((pin2_value != pin1_value && acqCon.bForwardScan) || (pin2_value == pin1_value && !acqCon.bForwardScan))
             {
-                GPR_Capture_raw(0);
-                frontRowData();
+                GPR_Capture_raw(0); //노벨다칩에서 펄스 데이터 획득
+                frontRowData(); //취득한 펄스 데이터 기록
             }
             else
             {
-                backRowData();
+                backRowData(); // 뒤로 이동 처리
             }
         }
     }
@@ -46,6 +49,7 @@ bool wiringPi_ready()
         return false;
     }
 
+    //led를 컨트롤하는 아두이노와 시리얼 세팅
     if ((arduino_serial_fd = serialOpen("/dev/ttyS0", 57600)) < 0)
     {
         printf("arduino_serial_fd failed\n");
@@ -74,16 +78,21 @@ bool wiringPi_ready()
         return false;
     }
 
+    //엔코더와 연결핀 설정
     pinMode(ENCODER_PIN1, INPUT);
     pinMode(ENCODER_PIN2, INPUT);
-    pinMode(LASER_PIN, OUTPUT);
     pinMode(ENCODER_POWER_PIN, OUTPUT);
 
+     //레이저와 연결핀 설정
+    pinMode(LASER_PIN, OUTPUT);
+    
+    //주기적으로 배터리 정보를 앱으로 보내는 쓰레드 설정
     threadBattery();
     printf("wiringPi setup completed..\n");
     return true;
 }
 
+//배터리 정보를 주기적으로 아두이노로 보내기 위한 쓰레드
 void threadBattery()
 {
     pthread_t batteryThread;
@@ -94,6 +103,7 @@ void threadBattery()
     pthread_create(&batteryThread, &attr, setBatteryGauge, NULL);
 }
 
+//배터리 일정시간 마다 읽어서 아두이노로 전송
 void *setBatteryGauge(void *arg)
 {
     while (true)
@@ -138,21 +148,25 @@ void readBatterGauge()
     }
 }
 
+//소켓서버 시행 시 아두이노 색상 변경
 void switchServerON()
 {
     serialPuts(arduino_serial_fd, "server on\n");
 }
 
+//소켓서버 죵료 시 아두이노 색상 변경
 void switchServerOFF()
 {
     serialPuts(arduino_serial_fd, "server off\n");
 }
 
+//소켓클라이언트 접속 시 아두이노 색상 변경
 void switchClientON()
 {
     serialPuts(arduino_serial_fd, "client on\n");
 }
 
+//소켓클라이언트 종료 시 아두이노 색상 변경
 void switchClientOFF()
 {
     serialPuts(arduino_serial_fd, "client off\n");

@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#define PORT 4000
+#define PORT 4000 //포트 번호는 4000으로 함
 extern int server_socket, client_socket, select_channel;
 extern bool server_restart;
 

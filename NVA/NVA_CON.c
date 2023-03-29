@@ -7,6 +7,8 @@
 #include "NVA_SPI.h"
 #include "GPR_TimingMeasurement.h"
 
+//노벨다칩 관련은 gpr_mini 펌웨어를 참고하여 작성됨
+
 void NVA_KitConncetCheck(int deviceNumber)
 {
     NVAParam.ChipID = SPI_Read(deviceNumber, CHIP_ID, 2);

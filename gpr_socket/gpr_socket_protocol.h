@@ -1,6 +1,9 @@
 #ifndef gpr_socket_param__h
 #define gpr_socket_param__h
 
+//NTF : Node To Flutter
+//처음에는 서버를 Node로 만들었음. Flutter는 앱을 개발한 언어.
+
 extern enum SocketProtocol
 {
     //최초 연결

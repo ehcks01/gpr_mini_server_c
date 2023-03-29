@@ -10,6 +10,7 @@
 
 char strNVAPath[100];
 
+//노벨다칩 세팅 정보를 라즈베리에 저장하는 경로
 bool initNVAPath()
 {
     char *NVAPath = "/NVA_Setting";
@@ -19,6 +20,7 @@ bool initNVAPath()
     return true;
 }
 
+//노발다칩 세팅 정보를 json형태로 바꿈
 char *getNVAJson()
 {
     cJSON *root;
@@ -47,6 +49,7 @@ char *getNVAJson()
     return out;
 }
 
+//노벨다칩 세팅 정보를 라즈베리에 파일로 저장
 void saveNVASetting()
 {
     char *out = getNVAJson();
@@ -59,6 +62,7 @@ void saveNVASetting()
     free(out);
 }
 
+//노벨다칩 세팅 정보를 라즈베리에 저장된 파일에서 읽음
 char *readNVAFile()
 {
     FILE *fp = fopen(strNVAPath, "r");
@@ -82,9 +86,11 @@ char *readNVAFile()
     return NULL;
 }
 
+//json 형태로 받은 노벨다칩 세팅정보를 적용
 void setNVASetting(char *bytes)
 {
     cJSON *json = cJSON_Parse(bytes);
+    //Gain, CoarseTune, MediumTune, FineTune 정보만 세팅하도록 했음
     if (json != NULL)
     {
         NVAParam.Gain = cJSON_GetObjectItem(json, "Gain")->valueint;
@@ -108,9 +114,12 @@ void setNVASetting(char *bytes)
     }
 }
 
+//벨다칩 세팅정보를 파일에서 읽고 적용하는 부분을 묶은 함수
 void loadNVASetting()
 {
+    //노벨다 칩정보를 txt에서 읽어옴
     char *bytes = readNVAFile();
+
     if (bytes != NULL)
     {
         setNVASetting(bytes);

@@ -6,6 +6,8 @@
 #include "NVA_SPI.h"
 #include "../common/gpr_param.h"
 
+//노벨다칩 관련은 gpr_mini 펌웨어를 참고하여 작성됨
+
 const int SampleDelayCoarseTuneMode = 1;
 const int SampleDelayMediumTuneMode = 2;
 const int RISING_EDGE = 0;
