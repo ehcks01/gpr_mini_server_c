@@ -18,7 +18,7 @@ char *deviceName[10] = {"sda", "sdb", "sdc", "sdd", "sde", "sdf", "sdg", "sdh", 
 bool initUsbMountPath()
 {
     char *usbPath = "/usb";
-    strcpy(usbData.mountPath, strRealPath); //프로그램 실행경로
+    strcpy(usbData.mountPath, strExePath); //프로그램 실행경로
     strcat(usbData.mountPath, usbPath);
     mkdirs(usbData.mountPath);
     return true;
@@ -148,7 +148,7 @@ void tryUsbUmount()
 //데이터 경로를 마운트한 usb 경로로 변환
 char *changeSDPathToUsbPath(char *sdPath)
 {
-    char *restPath = sdPath + strlen(strRealPath);
+    char *restPath = sdPath + strlen(strExePath);
     if (restPath != NULL)
     {
         int path_len = strlen(usbData.mountPath) + strlen(restPath) + 1;

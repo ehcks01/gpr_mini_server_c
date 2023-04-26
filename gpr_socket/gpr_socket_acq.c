@@ -54,7 +54,7 @@ bool fileexists(const char *path, const char *filename)
 bool makeSavePath()
 {
     char pathBuf[4096];
-    strcpy(pathBuf, strRealPath);
+    strcpy(pathBuf, strExePath);
     int inc = 0;
     strcat(pathBuf, "/");
     strcat(pathBuf, fixDataRootName);

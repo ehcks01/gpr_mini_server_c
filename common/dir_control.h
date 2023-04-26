@@ -19,7 +19,7 @@ bool initRealPath(char *argv0);
 //mgm파일이 header info가 전부 0이면 저장이 잘못된 파일이라 보고 삭제.
 bool checkHeaderInfoFromAcqFile(char *path);
 
-extern char strRealPath[100]; //이 프로그램 실행경로
+extern char strExePath[100]; //이 프로그램 실행경로
 extern char strExeName[100]; //이 프로그램 이름
 
 #endif

@@ -142,7 +142,7 @@ FILE *info_log_add_fp()
     struct tm tm = *localtime(&t);
 
     char logPath[100];
-    sprintf(logPath, "%s/%d-%d-%d-logging.txt", strRealPath, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+    sprintf(logPath, "%s/%d-%d-%d-logging.txt", strExePath, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
     FILE *fp_log = fopen(logPath, "aw+");
     log_add_callback(file_callback, fp_log, LOG_INFO);
     return fp_log;

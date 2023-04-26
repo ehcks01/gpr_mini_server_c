@@ -21,9 +21,9 @@ pthread_t usbThread; //
 //데이터가 저장되는 경로를 앱에 전송
 void sendRootDir()
 {
-    int pathLen = strlen(strRealPath) + strlen(fixDataRootName) + 1;
+    int pathLen = strlen(strExePath) + strlen(fixDataRootName) + 1;
     char pathBuf[pathLen];
-    strcpy(pathBuf, strRealPath);
+    strcpy(pathBuf, strExePath);
     strcat(pathBuf, "/");
     strcat(pathBuf, fixDataRootName);
     socket_write(ANA_ROOT_DIR_NTF, pathBuf, strlen(pathBuf));
@@ -125,7 +125,7 @@ void *tryCopyFiles(void *arg)
         {
             cJSON *subitem = cJSON_GetArrayItem(list, i);
             char *path = cJSON_GetObjectItem(subitem, "path")->valuestring;
-            char *subPath = path + strlen(strRealPath);
+            char *subPath = path + strlen(strExePath);
             socket_write(ANA_USB_COPYING_NAME_NTF, subPath, strlen(subPath));
             if (cJSON_GetObjectItem(subitem, "isDir")->valueint)
             {

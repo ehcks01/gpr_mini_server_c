@@ -14,7 +14,7 @@ char strNVAPath[100];
 bool initNVAPath()
 {
     char *NVAPath = "/NVA_Setting";
-    strcpy(strNVAPath, strRealPath);
+    strcpy(strNVAPath, strExePath);
     strcat(strNVAPath, NVAPath);
 
     return true;

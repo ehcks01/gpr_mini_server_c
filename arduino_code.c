@@ -25,7 +25,7 @@ void setup()
     FastLED.show();
 
     //대기 시간이 길거나 짧으면 여기 수정
-    MsTimer2::set(3600, bootWaitFunc); //zero: fast 7500, non 7600 //zero: 2800, 3600
+    MsTimer2::set(3600, bootWaitFunc); //zero: fast 7500, none 7600 //zero2: fast 2800, none 3600
     MsTimer2::start();
 }
 

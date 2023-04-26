@@ -5,5 +5,4 @@
 
 char *getWifiInfoList();
 void changeWifiChannel(char *channel);
-bool checkHostFile();
 void wifiRestartCommand();

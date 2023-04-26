@@ -12,14 +12,14 @@
 #include "cJSON.h"
 #include "usb_control.h"
 
-char strRealPath[100]; //실행 파일 경로
+char strExePath[100]; //실행 파일 경로
 char strExeName[100];  //실행 파일 이름
 
 //프로그램의 이름과 실행경로를 구함
 bool initRealPath(char *argv0)
 {
     //프로그램 전체 경로 구함
-    char *res = realpath(argv0, strRealPath);
+    char *res = realpath(argv0, strExePath);
 
     if (!res)
     {

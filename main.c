@@ -15,13 +15,6 @@
 
 int main(char *argc, char *argv[])
 {
-    /* wifi 채널 변경 시 해당 프로그램이 hostapd 파일을 잘못쓰게 되는 경우, 
-      이를 복구 시키려고 했으나, 라즈베리가 부팅 시 여기서 네트워크가 영구 다운되는 증상 때문에 보류 */
-    // if (checkHostFile() == false)
-    // {
-    //     printf("hostFile initialization failed\n");
-    // }
-
     /* initRealPath: 프로그램이 실행되는 경로
        initUsbMountPath: 마운트 되는 usb와 연결되는 폴더경로 지정
        initNVAPath: 노벨다칩 세팅 정보를 저장하는 경로 지정 */
